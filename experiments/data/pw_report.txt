@@ -1,0 +1,23 @@
+[PRETRAINED-WITNESS] frozen pretrained backbone as the witness
+{"name": "P0_raw_pixels_probe", "acc": 0.30320000648498535, "cost": "ridge (1s)", "r_ib": 0.15800769291441252, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 33.273667092118046, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P1_random_probe", "acc": 0.3517000079154968, "cost": "random init + probe", "r_ib": 0.22963175329004581, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 22.895332621473678, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P2_mnist_probe", "acc": 0.30379998683929443, "cost": "pretrain 5ep + probe", "r_ib": 0.15882758901597072, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 33.10190253847598, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P2_mnist_1nn", "acc": 0.1940000057220459, "cost": "pretrain 5ep + probe", "r_ib": 0.03965078842067982, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 132.59497683243399, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P3_rot_probe", "acc": 0.352400004863739, "cost": "pretrain 5ep + probe", "r_ib": 0.23074277736347515, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 22.78509183299795, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P3_rot_1nn", "acc": 0.21700000762939453, "cost": "pretrain 5ep + probe", "r_ib": 0.059073603609911984, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 88.99906304591217, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P5_target_8ep_cnn", "acc": 0.571, "cost": "8 epochs on target", "r_ib": 0.6769447272683717, "k_min": 2, "excluded": [], "coverage": 0.0, "false_excl": [], "k_wall": 192, "looseness": 7.7665061270851306, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+{"name": "P6_cph_teacher", "acc": 0.803, "cost": "120 epochs on target (reference)", "r_ib": 1.373516542137307, "k_min": 4, "excluded": [2, 3], "coverage": 0.4, "false_excl": [], "k_wall": 192, "looseness": 3.8277626884978595, "fails": [2, 3, 4, 6, 8], "succeeds": [192, 256]}
+  P-A soundness for every witness (zero false exclusions): [('P0_raw_pixels_probe', 0), ('P1_random_probe', 0), ('P2_mnist_probe', 0), ('P2_mnist_1nn', 0), ('P3_rot_probe', 0), ('P3_rot_1nn', 0), ('P5_target_8ep_cnn', 0), ('P6_cph_teacher', 0)] -> PASS
+  P-B a pretrained witness is useful (acc >= 0.65 with no target-side training): [('P2_mnist_probe', 0.304), ('P3_rot_probe', 0.352)] -> FAIL
+  P-C domain gap (same-domain rotation minus cross-domain MNIST >= 0.10): 0.049 -> FAIL
+  P-D pretraining beats random features (>= 0.15): 0.001 -> FAIL
+  P-E cost vs coverage (target-side cost, acc, R_IB, K_min, excluded, coverage, looseness):
+      P0_raw_pixels_probe cost=ridge (1s)     acc=0.303 R_IB=0.16 K_min=  2 excl=[] cov=0.00 loose=33.27 false=[]
+      P1_random_probe  cost=random init + probe acc=0.352 R_IB=0.23 K_min=  2 excl=[] cov=0.00 loose=22.9 false=[]
+      P2_mnist_probe   cost=pretrain 5ep + probe acc=0.304 R_IB=0.16 K_min=  2 excl=[] cov=0.00 loose=33.1 false=[]
+      P2_mnist_1nn     cost=pretrain 5ep + probe acc=0.194 R_IB=0.04 K_min=  2 excl=[] cov=0.00 loose=132.59 false=[]
+      P3_rot_probe     cost=pretrain 5ep + probe acc=0.352 R_IB=0.23 K_min=  2 excl=[] cov=0.00 loose=22.79 false=[]
+      P3_rot_1nn       cost=pretrain 5ep + probe acc=0.217 R_IB=0.06 K_min=  2 excl=[] cov=0.00 loose=89.0 false=[]
+      P5_target_8ep_cnn cost=8 epochs on target acc=0.571 R_IB=0.68 K_min=  2 excl=[] cov=0.00 loose=7.77 false=[]
+      P6_cph_teacher   cost=120 epochs on target (reference) acc=0.803 R_IB=1.37 K_min=  4 excl=[2, 3] cov=0.40 loose=3.83 false=[]
+verdict: MIXED/REFUTED: the pretrained-witness claims did not hold (recorded as-is)

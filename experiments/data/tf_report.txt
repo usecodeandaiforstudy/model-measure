@@ -1,0 +1,12 @@
+[TF-EXCLUSION] Transformer exclusion pipeline + residual-bypass boundary
+  seeds: 3; X1 (serial exclusion + wall) passed 3/3; X2 (bypass unbinds / no-bypass binds) passed 3/3
+    seed 0: acc_t=0.949 R_IB=1.99 K_min=8 K_wall=16 looseness=1.3953426394362771 | excluded=[2, 4] fails=[2, 4] succeeds=[16, 32, 64, 128, 256]
+      arm gaps (rel): SER={2: 0.8, 4: 0.58, 8: 0.21, 16: 0.02, 32: 0.02, 64: 0.01, 128: -0.0, 256: 0.0}
+                      FFN={2: 0.03, 8: 0.03, 64: 0.01} FFN-NORES={2: 0.89, 8: 0.67, 64: 0.09}
+    seed 1: acc_t=0.948 R_IB=1.98 K_min=8 K_wall=16 looseness=1.398934883321158 | excluded=[2, 4] fails=[2, 4] succeeds=[16, 32, 64, 128, 256]
+      arm gaps (rel): SER={2: 0.77, 4: 0.6, 8: 0.24, 16: 0.02, 32: 0.01, 64: 0.0, 128: -0.0, 256: -0.0}
+                      FFN={2: 0.03, 8: 0.02, 64: 0.01} FFN-NORES={2: 0.88, 8: 0.49, 64: 0.09}
+    seed 2: acc_t=0.954 R_IB=2.02 K_min=8 K_wall=16 looseness=1.3756528820389926 | excluded=[2, 4] fails=[2, 4] succeeds=[16, 32, 64, 128, 256]
+      arm gaps (rel): SER={2: 0.78, 4: 0.59, 8: 0.22, 16: 0.02, 32: 0.01, 64: 0.02, 128: 0.0, 256: 0.0}
+                      FFN={2: 0.03, 8: 0.02, 64: 0.02} FFN-NORES={2: 0.89, 8: 0.58, 64: 0.09}
+verdict: SUPPORT: the exclusion pipeline runs end-to-end on a Transformer (certified exclusion + located wall on the pooled serial path), AND the Transformer-specific boundary is confirmed: a VQ inside the FFN branch is bypassed by the residual stream, so its log K is not the supply -- the wiring table's parallel rule governs there

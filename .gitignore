@@ -216,3 +216,37 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Documentation IS shipped: every document the README links to lives in docs/ (English + a _cn twin).
+# reference/ holds local working material that stays on disk but is never committed: the pre-translation
+# Chinese snapshots, retired process documents (PLAN/HANDOVER) and old run dumps.
+reference/
+
+# Everything under experiments/data is local bulk: datasets, model checkpoints and per-run caches (1.9 GB).
+experiments/data/**
+# ...EXCEPT the recorded evidence, which is shipped at any depth (~750 KB in total):
+#   * the jsonl result rows and the append-only *_report.txt verdict reports -- without these,
+#     tools/reproduce_all.py could replay nothing, and a reader could not check a published verdict;
+#   * the two tiny *_calib.json calibration files.
+# The directory re-inclusion is what makes the nested files reachable: git cannot re-include a file whose
+# parent directory is excluded, and two CP-H reading files live inside experiments/data/cph/.
+!experiments/data/**/
+!experiments/data/**/*.jsonl
+!experiments/data/**/*_report.txt
+!experiments/data/*_calib.json
+# Run logs are NOT shipped even though one note cites them as raw data: they carry machine-local absolute
+# paths, and the offline replay does not need them (the jsonl rows do). See CPH_PA1_REPORT.md.
+experiments/data/*.log
+
+# Trae IDE local config (editor state/session records; not part of the project)
+.trae/
+
+# Runtime temporary state files
+_cp3_*.txt
+
+# Packaging / install verification artifacts (produced by `pip install -e .` or `pip wheel .`)
+*.egg-info/
+.pipverify/
+.pipwheelout/
+.piptmp/
+.pipcache/

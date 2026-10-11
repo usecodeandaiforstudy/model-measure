@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Capacity Lens: information-theoretic capacity diagnostics for neural networks"
+abstract: >-
+  A lightweight PyTorch toolkit that answers two design questions with information-theoretic necessary
+  conditions: how much capacity does a task require, and can a given architecture supply it? A bottleneck
+  layer inserted after the representation makes "capacity" a measurable number; the requirement is read
+  from a reference model's achieved error (Fano), which yields a sound exclusion rule (log K < R_IB means
+  the bottleneck provably cannot carry the task) and a measured practical wall for sizing decisions.
+type: software
+authors:
+  - name: "usecodeandaiforstudy"
+version: "0.6.1"
+date-released: "2026-10-05"
+license: MIT
+keywords:
+  - information theory
+  - capacity
+  - quantization
+  - knowledge distillation
+  - vector quantization
+  - Fano inequality
+  - model compression
+  - interpretability
+# Repository URL and DOI are intentionally omitted rather than guessed: this project has not been published
+# yet, and fabricated metadata is worse than absent metadata (see CONTRIBUTING.md, rule 8). Add `url`,
+# `repository-code` and `doi` here once they exist.

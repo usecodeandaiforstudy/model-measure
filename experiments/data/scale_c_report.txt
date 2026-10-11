@@ -1,0 +1,12 @@
+[SCALE-C] class-count axis
+{"c": 8, "m": 2, "seed": 0, "acc_t": 0.6875, "h_z_t": 3.525212049484253, "eps": 0.3125, "rib": 0.8502582455448053, "k_min": 3, "accs": {"2": 0.21666666666666667, "32": 0.7291666666666666}, "rel": {"2": 0.6848484848484848, "32": -0.06060606060606055}, "fails": [2], "succeeds": [32], "excluded": [2], "k_wall": 32, "looseness": 4.076097963130068, "s1": true, "k_teacher": 64, "false_excl": [], "coverage": 1.0, "sigma": 1.0, "fp": "25bca3d3"}
+{"c": 64, "m": 4, "seed": 0, "acc_t": 0.5489583333333333, "h_z_t": 5.742953300476074, "eps": 0.4510416666666667, "rib": 1.6018110372090835, "k_min": 5, "accs": {"2": 0.0265625, "32": 0.1390625}, "rel": {"2": 0.9516129032258064, "32": 0.7466793168880456}, "fails": [2, 32], "succeeds": [], "excluded": [2], "k_wall": null, "looseness": null, "s1": true, "k_teacher": 512, "false_excl": [], "coverage": 0.5, "sigma": 1.0, "fp": "25bca3d3"}
+  instances: 2 run, 2 inside the informative error range (S1 gate)
+    C=    8 seed=0 eps=0.312 [gated in] R_IB=0.85 K_min=   3 K_wall=32 looseness=4.08 excl=[2] false=[]
+    C=   64 seed=0 eps=0.451 [gated in] R_IB=1.60 K_min=   5 K_wall=None looseness=None excl=[2] false=[]
+  looseness available for 1/2 gated instances (a wall must be located inside the K grid; the rest are 'wall beyond grid')
+  S2 wall scaling: only 1 located walls -> not fitted
+  S3 direction (looseness non-increasing in C): Spearman=+0.000 over 1 instances -> FAIL ; asymptote within 0.5 nats -> FAIL
+  S4 soundness at scale (zero false exclusions at every C): [(8, 0), (64, 0)] -> PASS
+  S5 ceiling effect: excluded levels C=8:1 -> C=64:1 -> FAIL
+verdict: MIXED/REFUTED: the scale criteria did not hold (recorded as-is)

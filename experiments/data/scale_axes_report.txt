@@ -1,0 +1,1 @@
+A3-prime resolution (non-degenerate): SUPPORT: the resolution invariance holds at a non-degenerate operating point too

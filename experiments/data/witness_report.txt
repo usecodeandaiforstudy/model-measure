@@ -1,0 +1,5 @@
+[WITNESS] witness strength vs requirement-bound tightness
+  task C: T1 monotone R_IB = PASS; T2 soundness (no false exclusion) = PASS; coverage W1=[0.0, 0.0, 0.0] W4=[0.4, 0.3333333333333333, 0.4] -> STEEP
+           R_IB by witness (median): W1=0.08, W2=0.16, W3=0.65, W4=1.36; K_min W4=4; label-only target K_min=10
+           label-only false exclusions (task C): 0; strongest-witness false exclusions: 0
+verdict: SUPPORT: witness strength materially controls exclusion coverage; cheap witnesses stay sound but miss exclusions (the measured cost of skipping the witness)

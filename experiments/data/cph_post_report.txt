@@ -1,0 +1,6 @@
+[CP-H 事后分析] experiments/data/cph/cph_readings_0d8045d2.jsonl
+knee 14 点 = 底部 10 + 顶部 4
+i_plug: knee rho(acc)=+0.92 rho(logK)=+0.82 partial=+0.71; bottom rho(acc)=+0.78
+silhouette: knee rho(acc)=+0.64 rho(logK)=+0.64 partial=+0.21; bottom rho(acc)=+0.03
+separation: knee rho(acc)=+0.68 rho(logK)=+0.81 partial=-0.16; bottom rho(acc)=+0.13
+d_prime: knee rho(acc)=+0.60 rho(logK)=+0.80 partial=-0.44; bottom rho(acc)=-0.05

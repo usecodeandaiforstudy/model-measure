@@ -1,0 +1,12 @@
+[FAMILY-LIBRARY] within-family amortisation of the witness-relative reading
+{"c": 2, "acc_ridge": 0.8190000057220459, "acc_randfeat": 0.8194999992847443, "acc_t": 0.9845, "rib": 0.613180744607602, "k_min": 2, "excl_measured": [], "excl_label_only": [], "rib_pred": 0.6931471805599453, "acc_pred": 1.0, "k_min_pred": 2, "excl_pred": []}
+{"c": 3, "acc_ridge": 0.6416666805744171, "acc_randfeat": 0.6699999868869781, "acc_t": 0.927, "rib": 0.7866817599884771, "k_min": 3, "excl_measured": [2], "excl_label_only": [2], "rib_pred": 0.6454730519192104, "acc_pred": 0.878867042503241, "k_min_pred": 2, "excl_pred": []}
+{"c": 4, "acc_ridge": 0.5475000143051147, "acc_randfeat": 0.5789999961853027, "acc_t": 0.78425, "rib": 0.6277927561125071, "k_min": 2, "excl_measured": [], "excl_label_only": [2], "rib_pred": 0.7616807849008197, "acc_pred": 0.836660309625584, "k_min_pred": 3, "excl_pred": [2]}
+{"c": 5, "acc_ridge": 0.4416000247001648, "acc_randfeat": 0.4869999885559082, "acc_t": 0.7952, "rib": 0.8185397643431219, "k_min": 3, "excl_measured": [2], "excl_label_only": [2, 4], "rib_pred": 0.6933846861152628, "acc_pred": 0.7471159416721567, "k_min_pred": 3, "excl_pred": [2]}
+{"c": 6, "acc_ridge": 0.38966667652130127, "acc_randfeat": 0.4139999747276306, "acc_t": 0.7863333333333333, "rib": 0.9291018530240072, "k_min": 3, "excl_measured": [2], "excl_label_only": [2, 4], "rib_pred": 0.6951556429239933, "acc_pred": 0.6988148941242085, "k_min_pred": 3, "excl_pred": [2]}
+{"c": 10, "acc_ridge": 0.2990000247955322, "acc_randfeat": 0.3440999984741211, "acc_t": 0.5912, "rib": 0.7279408748225038, "k_min": 3, "excl_measured": [2], "excl_label_only": [2, 4, 8], "rib_pred": 1.0921645422756319, "acc_pred": 0.7192852188382393, "k_min_pred": 3, "excl_pred": [2]}
+  F-1 family law (Spearman(acc_ridge, acc_t) >= 0.80): +0.829 -> PASS
+  F-2 usable prediction (LOO |dR_IB| <= 0.30 nats for all): [(2, 0.08), (3, -0.14), (4, 0.13), (5, -0.13), (6, -0.23), (10, 0.36)] -> FAIL
+  F-3 safety (predicted exclusion subset of measured; violations = over-exclusion): [(2, []), (3, []), (4, [2]), (5, []), (6, []), (10, [])] -> FAIL
+  F-4 contrast (label-only reading ln C, same safety metric): [(2, []), (3, []), (4, [2]), (5, [4]), (6, [4]), (10, [4, 8])]
+verdict: MIXED/REFUTED: the family-library criteria did not hold (recorded as-is)

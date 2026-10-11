@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capacity-lens"
+dynamic = ["version"]
+description = "Information-theoretic capacity diagnostics for neural networks: how much capacity does a task need, and can a given architecture hold it?"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "usecodeandaiforstudy" }]
+keywords = ["information-theory", "capacity", "quantization", "distillation", "vq", "fano", "interpretability"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# The package itself needs only torch; torchvision is used by the experiment scripts (not packaged).
+dependencies = ["torch>=2.0"]
+
+[project.optional-dependencies]
+experiments = ["torchvision>=0.15"]
+test = ["pytest>=7"]
+dev = ["torchvision>=0.15", "pytest>=7"]
+
+[tool.setuptools]
+# ship ONLY the library: experiments/ and reference/ stay in the repository (they are the evidence, not the API)
+packages = ["capacity_lens"]
+
+[tool.setuptools.dynamic]
+version = { attr = "capacity_lens.__version__" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

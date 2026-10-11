@@ -1,0 +1,297 @@
+{
+ "tool": "tools/reproduce_all.py",
+ "when": "2026-10-11 16:59:38",
+ "modules": [
+  {
+   "topic": "budget_dose_demo",
+   "kind": "replayable",
+   "recorded": [
+    "I1 (K=1024, C=64): rel ~ (0.1644) * epochs^(-0.282), R^2=0.917 over 4 rungs -> PASS",
+    "I2 (K=4096, C=216): rel ~ (0.1599) * epochs^(-0.100), R^2=0.090 over 3 rungs -> FAIL",
+    "I3 (K=256, C=64): rel ~ (0.0856) * epochs^(-0.211), R^2=1.000 over 2 rungs -> PASS",
+    "P2 shared exponent: I1 b=-0.282 vs I2 b=-0.100, |diff|=0.182 (tol 0.15) -> FAIL",
+    "P3 predictive: I1's fit predicts I2's deficit at 360 epochs = 0.0312 vs observed 0.1087 (relative error 71.3%, tol 30%) -> FAIL",
+    "verdict: REFUTED: the dose-response is not a power law at this resolution"
+   ],
+   "replayed": "I1 (K=1024, C=64): rel ~ (0.1644) * epochs^(-0.282), R^2=0.917 over 4 rungs -> PASS\n  I2 (K=4096, C=216): rel ~ (0.1599) * epochs^(-0.100), R^2=0.090 over 3 rungs -> FAIL\n  I3 (K=256, C=64): rel ~ (0.0856) * epochs^(-0.211), R^2=1.000 over 2 rungs -> PASS\n  P2 shared exponent: I1 b=-0.282 vs I2 b=-0.100, |diff|=0.182 (tol 0.15) -> FAIL\n  P3 predictive: I1's fit predicts I2's deficit at 360 epochs = 0.0312 vs observed 0.1087 (relative error 71.3%, tol 30%) -> FAIL\n  P4 (extrapolated budget to reach rel=0.10): I1: 5 epochs, I2: 110 epochs, I3: 0 epochs  [EXTRAPOLATION, not measured]\n  K-dependence of the exponent: I1 (K=1024) b=-0.282 vs I3 (K=256) b=-0.211\n  [verdict] REFUTED: the dose-response is not a power law at this resolution",
+   "ok": true
+  },
+  {
+   "topic": "budget_mechanism_demo",
+   "kind": "replayable",
+   "recorded": [
+    "R1 baseline cell (fixed LR, restarts ON): 60->0.1207, 60->0.1207, 180->0.0685, 180->0.0685, 360->0.1087, 360->0.1087 | best 0.0685 at 180, last 0.1087 -> non-monotone by +0.0402 -> PASS",
+    "verdict: SUPPORT: the non-monotonicity is attributable to both the fixed LR and the restart"
+   ],
+   "replayed": "R1 baseline cell (fixed LR, restarts ON): 60->0.1207, 60->0.1207, 180->0.0685, 180->0.0685, 360->0.1087, 360->0.1087 | best 0.0685 at 180, last 0.1087 -> non-monotone by +0.0402 -> PASS\n  R2 cosine annealing (restarts ON): 60->-0.0076, 60->-0.0076, 180->-0.0158, 180->-0.0158, 360->-0.0189, 360->-0.0189 -> monotone at a healthy level (the fixed LR was the cause)\n  R3 restarts OFF (fixed LR): 60->0.8716, 60->0.8716, 180->0.8475, 180->0.8475, 360->0.8153, 360->0.8153 -> monotone=True, collapsed=True -> NOT credited: monotone only because the student collapsed\n  R4 cosine + restarts OFF: 60->0.9097, 180->0.8425, 360->0.8535\n  R4 best deficit over all cells: -0.0189 (cosine_restartson at 360 epochs)\n  [verdict] SUPPORT: the non-monotonicity is attributable to the fixed learning rate",
+   "ok": true
+  },
+  {
+   "topic": "cifar_demo",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cp3_demo",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cp3_dyn",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cp3_dyn_sens",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cp3_multilevel",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cph_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "ratio_verdict",
+    "s_verdict"
+   ]
+  },
+  {
+   "topic": "cph_post",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "cross_task_demo",
+   "kind": "replayable",
+   "recorded": [
+    "X1 invariance on scale-equivalent tasks: |dR_IB|=0.175 nats (tol 0.3), |dI(X;Y)|=0.000 (tol 0.3) -> PASS",
+    "X2 ordering by the true information: 0 material inversions over 4 points (Spearman=+0.949, descriptive) -> PASS",
+    "verdict: SUPPORT (ordinal): tasks can be ordered on a common scale, but the numbers are not comparable -- the under-reading grows with the task's information"
+   ],
+   "replayed": "X1 invariance on scale-equivalent tasks: |dR_IB|=0.175 nats (tol 0.3), |dI(X;Y)|=0.000 (tol 0.3) -> PASS\n       B(sigma .50, spacing 3): R_IB=4.952, true=5.356, K_min=142 | C(sigma 1.0, spacing 6): R_IB=4.777, true=5.356, K_min=119\n  X2 ordering by the true information: 0 material inversions over 4 points (Spearman=+0.949, descriptive) -> PASS\n  X3 under-reading (rib_bayes - rib) vs the task's true information: [0.87, 0.8, 0.34, 0.52] at I=[4.54, 5.16, 5.36, 5.36], slope -0.50 -> the offset is NOT constant: it shrinks with the task's information, so the numbers are not commensurable\n  [verdict] SUPPORT (ordinal): the reading IS a function of the task's information and orders tasks correctly, but the readings are not commensurable across tasks -- the gap between the Bayes requirement and the reading is task- and witness-dependent, not a constant offset",
+   "ok": true
+  },
+  {
+   "topic": "family_b_demo",
+   "kind": "replayable",
+   "recorded": [
+    "Y1 invariance on the exactly scale-equivalent twin: |dR_IB|=0.067 nats, |dI(X;Y)|=0.0000 -> PASS",
+    "Y2 ordering inside family B: 0 material inversions over 4 points (Spearman=+0.949, descriptive) -> PASS",
+    "verdict: MIXED: the ordinal claim holds inside family B (Y1/Y2), but at matched information the under-reading differs from the lattice by up to 0.59 nats -> the offset is family-specific, so readings from different families are not comparable even ordinally"
+   ],
+   "replayed": "Y1 invariance on the exactly scale-equivalent twin: |dR_IB|=0.067 nats, |dI(X;Y)|=0.0000 -> PASS\n       B1 (spread 3): R_IB=2.673, true=4.603 | B3 (spread 6): R_IB=2.606, true=4.603\n  Y2 ordering inside family B: 0 material inversions over 4 points (Spearman=+0.949, descriptive) -> PASS\n       B1: true I(X;Y)=4.603, reading=2.673, under-reading=0.542 nats\n       B2: true I(X;Y)=3.268, reading=0.984, under-reading=0.274 nats\n       B3: true I(X;Y)=4.603, reading=2.606, under-reading=0.608 nats\n       B4: true I(X;Y)=5.226, reading=4.441, under-reading=0.381 nats\n   B1: under-reading 0.542 vs lattice C=216 sigma=1.00 0.867 -> gap 0.326 (|dI|=0.059)\n   B3: under-reading 0.608 vs lattice C=216 sigma=1.00 0.867 -> gap 0.259 (|dI|=0.059)\n   B4: under-reading 0.381 vs lattice C=216 sigma=0.70 0.802 -> gap 0.421 (|dI|=0.065)\n  [verdict] MIXED: the ordinal claim holds inside family B (Y1/Y2), but at matched information the under-reading differs from the lattice by up to 0.42 nats",
+   "ok": true
+  },
+  {
+   "topic": "family_c_demo",
+   "kind": "replayable",
+   "recorded": [
+    "Z1 invariance on the exact scale twin (spread and sigma both x2): |dR_IB|=0.429 nats, |dI(X;Y)|=0.0000 -> FAIL",
+    "Z2 ordering inside family C: 0 material inversions over 3 points (Spearman=+0.866, descriptive) -> PASS",
+    "verdict: REFUTED: the third family breaks invariance or ordering"
+   ],
+   "replayed": "Z1 invariance on the exact scale twin (spread and sigma both x2): |dR_IB|=0.429 nats, |dI(X;Y)|=0.0000 -> FAIL\n  Z2 ordering inside family C: 0 material inversions over 3 points (Spearman=+0.866, descriptive) -> PASS\n       C1: true I(X;Y)=5.243, reading=3.963, under-reading=1.003 nats\n       C2: true I(X;Y)=5.243, reading=3.534, under-reading=1.432 nats\n       C3: true I(X;Y)=4.884, reading=1.919, under-reading=2.236 nats\n  Z3 cross-family at matched information (|dI| <= 0.30):\n       C1 (I=5.243, under-reading 1.003) vs B (3-D random centres) B4 (I=5.226, 0.381) -> gap 0.622 nats\n       C2 (I=5.243, under-reading 1.432) vs B (3-D random centres) B4 (I=5.226, 0.381) -> gap 1.051 nats\n       C3 (I=4.884, under-reading 2.236) vs A (3-D lattice) lattice sigma=0.70 (I=5.161, 0.802) -> gap 1.434 nats\n       largest cross-family gap: 1.434 nats -> family-specific (within-family only)\n  [verdict] REFUTED: the third family breaks invariance or ordering",
+   "ok": true
+  },
+  {
+   "topic": "family_library_demo",
+   "kind": "replayable",
+   "recorded": null,
+   "replayed": "[FAMILY-LIBRARY offline re-validation]\n  C= 2: acc_ridge=0.819 acc_t=0.985 R_IB 0.61 -> pred 0.69 | K_min 2 -> 2 | excl [] vs pred []\n  C= 3: acc_ridge=0.642 acc_t=0.927 R_IB 0.79 -> pred 0.65 | K_min 3 -> 2 | excl [2] vs pred []\n  C= 4: acc_ridge=0.548 acc_t=0.784 R_IB 0.63 -> pred 0.76 | K_min 2 -> 3 | excl [] vs pred [2]\n  C= 5: acc_ridge=0.442 acc_t=0.795 R_IB 0.82 -> pred 0.69 | K_min 3 -> 3 | excl [2] vs pred [2]\n  C= 6: acc_ridge=0.390 acc_t=0.786 R_IB 0.93 -> pred 0.70 | K_min 3 -> 3 | excl [2] vs pred [2]\n  C=10: acc_ridge=0.299 acc_t=0.591 R_IB 0.73 -> pred 1.09 | K_min 3 -> 3 | excl [2] vs pred [2]\n  F-1 family law (Spearman(acc_ridge, acc_t) >= 0.80): +0.829 -> PASS\n  F-2 usable prediction (LOO |dR_IB| <= 0.30 nats for all): [(2, 0.08), (3, -0.14), (4, 0.13), (5, -0.13), (6, -0.23), (10, 0.36)] -> FAIL\n  F-3 safety (predicted exclusion subset of measured; violations = over-exclusion): [(2, []), (3, []), (4, [2]), (5, []), (6, []), (10, [])] -> FAIL\n  F-4 contrast (label-only reading ln C, same safety metric): [(2, []), (3, []), (4, [2]), (5, [4]), (6, [4]), (10, [4, 8])]\n  [verdict] MIXED/REFUTED: the family-library criteria did not hold (recorded as-is)",
+   "ok": true
+  },
+  {
+   "topic": "gauss_demo",
+   "kind": "criteria-only",
+   "recorded": [
+    "C0 arm sanity (noiseless ceiling retention >= 0.95): [1.0, 0.997, 0.992] -> PASS",
+    "C1 upper-bound consistency (R_IB(eps_measured) <= C_ub at every point): ['PASS', 'PASS', 'PASS'] -> PASS",
+    "C2 certified exclusion transfers (C_ub < R_IB => retention <= 0.75): [(0, 'vacuous'), (0, 'vacuous'), (0, 'vacuous')] -> FAIL",
+    "C3 wall located + sandwich contains the VQ wall [(C_ub(wall), log K_wall, flag)]: [(56.24, 4.564348191467836, 'PASS'), (44.05, 4.564348191467836, 'PASS'), (53.39, 4.564348191467836, 'PASS')] -> PASS",
+    "C4 (reported) [C_nom(wall), log K_wall, flag]: [(24.0, 4.564348191467836, 'FAIL'), (24.0, 4.564348191467836, 'FAIL'), (24.0, 4.564348191467836, 'FAIL')]",
+    "verdict: PARTIAL: two of the three continuous-side criteria hold (recorded as-is; see the lines)"
+   ],
+   "criteria": [
+    "gauss_verdict"
+   ]
+  },
+  {
+   "topic": "kv_demo",
+   "kind": "criteria-only",
+   "recorded": [
+    "K1 per-token flow binds: KV acc at K_tok=C_V: [1.0, 1.0, 1.0, 0.877] ; at K_tok=4: [0.51, 0.484, 0.518, 0.49] -> FAIL",
+    "K2 dense requirement ~ C_V^L: L=2: smallest K with acc>=0.90 is 96 (predicted ~64, factor 0.67x); L=3: smallest K with acc>=0.90 is 2048 (predicted ~512, factor 0.25x); L=4: no K reached 0.90 (predicted ~4096, grid top 4096) -> FAIL",
+    "K3 bottleneck position is the mechanism (CTRL K=8, acc>=0.90 for L in [2, 4, 8]): [0.534, 0.309, 0.207] -> FAIL",
+    "K4 kv_storage_capacity(L, ln C_V) = L*ln C_V predicts the dense wall within one octave -> FAIL",
+    "verdict: MIXED/REFUTED: the two-tier reading did not transfer to content-addressable memory (recorded)"
+   ],
+   "criteria": [
+    "kv_verdict"
+   ]
+  },
+  {
+   "topic": "looseness_demo",
+   "kind": "criteria-only",
+   "recorded": [
+    "D1 (deterministic, acc_ref>=0.99, 64 classes): n=13, median looseness=1.1685256052584667 -> PASS",
+    "D2 (high-error scenarios eps>=0.20): n=12, min looseness=1.995246472349215 -> FAIL",
+    "D3 Spearman(eps, looseness) = +0.837 (>= 0.6) -> PASS",
+    "verdict: MIXED: the pre-registered expectations are not all met (recorded as-is)"
+   ],
+   "criteria": [
+    "loos_verdict"
+   ]
+  },
+  {
+   "topic": "looseness_reaudit_demo",
+   "kind": "criteria-only",
+   "recorded": [
+    "original verdict (unchanged): MIXED: the pre-registered expectations are not all met (recorded as-is)",
+    "D2' verdict: PARTIAL: exactly one of the fit and the held-out generalisation holds",
+    "C1 positive slope and R^2 >= 0.5 -> PASS",
+    "held-out half: n=19, median |error| = 0.607 looseness units, sign inversions = 0 -> C2 FAIL",
+    "C3 adding c*ln(n_classes) raises R^2 by +0.001 (<= 0.05 required) [c = -0.139] -> PASS"
+   ],
+   "criteria": [
+    "loos_verdict"
+   ]
+  },
+  {
+   "topic": "mnist_demo",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "moe_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "followup_verdict",
+    "moe_verdict"
+   ]
+  },
+  {
+   "topic": "opt_demo",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "pa1_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "pa1_verdict"
+   ]
+  },
+  {
+   "topic": "pa3_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "pa31_verdict"
+   ]
+  },
+  {
+   "topic": "pa4_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "pa4_verdict"
+   ]
+  },
+  {
+   "topic": "pretrained_witness_demo",
+   "kind": "replayable",
+   "recorded": null,
+   "replayed": "[PRETRAINED-WITNESS offline re-verdict]\n  witness-accuracy thresholds (the reading is empty below these): K=2: acc >= 0.577 ; K=3: acc >= 0.721 ; K=4: acc >= 0.807 ; K=8: acc >= 0.966 ; K >= ceil(e^ln C) = 10 can NEVER be excluded on a 10-class task\n  P0_raw_pixels_probe  acc=0.303 R_IB= 0.16 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P1_random_probe      acc=0.352 R_IB= 0.23 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P2_mnist_probe       acc=0.304 R_IB= 0.16 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P2_mnist_1nn         acc=0.194 R_IB= 0.04 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P3_rot_probe         acc=0.352 R_IB= 0.23 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P3_rot_1nn           acc=0.217 R_IB= 0.06 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P5_target_8ep_cnn    acc=0.571 R_IB= 0.68 K_min=  2 excluded=[]                       coverage=0.00 false=[]\n  P6_cph_teacher       acc=0.803 R_IB= 1.37 K_min=  4 excluded=[2, 3]                   coverage=0.40 false=[]\n  P-A soundness for every witness (zero false exclusions): [('P0_raw_pixels_probe', 0), ('P1_random_probe', 0), ('P2_mnist_probe', 0), ('P2_mnist_1nn', 0), ('P3_rot_probe', 0), ('P3_rot_1nn', 0), ('P5_target_8ep_cnn', 0), ('P6_cph_teacher', 0)] -> PASS\n  P-B a pretrained witness is useful (acc >= 0.65 with no target-side training): [('P2_mnist_probe', 0.304), ('P3_rot_probe', 0.352)] -> FAIL\n  P-C domain gap (same-domain rotation minus cross-domain MNIST >= 0.10): 0.049 -> FAIL\n  P-D pretraining beats random features (>= 0.15): 0.001 -> FAIL\n  P-E cost vs coverage (target-side cost, acc, R_IB, K_min, excluded, coverage, looseness):\n      P0_raw_pixels_probe cost=ridge (1s)     acc=0.303 R_IB=0.16 K_min=  2 excl=[] cov=0.00 loose=33.27 false=[]\n      P1_random_probe  cost=random init + probe acc=0.352 R_IB=0.23 K_min=  2 excl=[] cov=0.00 loose=22.9 false=[]\n      P2_mnist_probe   cost=pretrain 5ep + probe acc=0.304 R_IB=0.16 K_min=  2 excl=[] cov=0.00 loose=33.1 false=[]\n      P2_mnist_1nn     cost=pretrain 5ep + probe acc=0.194 R_IB=0.04 K_min=  2 excl=[] cov=0.00 loose=132.59 false=[]\n      P3_rot_probe     cost=pretrain 5ep + probe acc=0.352 R_IB=0.23 K_min=  2 excl=[] cov=0.00 loose=22.79 false=[]\n      P3_rot_1nn       cost=pretrain 5ep + probe acc=0.217 R_IB=0.06 K_min=  2 excl=[] cov=0.00 loose=89.0 false=[]\n      P5_target_8ep_cnn cost=8 epochs on target acc=0.571 R_IB=0.68 K_min=  2 excl=[] cov=0.00 loose=7.77 false=[]\n      P6_cph_teacher   cost=120 epochs on target (reference) acc=0.803 R_IB=1.37 K_min=  4 excl=[2, 3] cov=0.40 loose=3.83 false=[]\n  [verdict] MIXED/REFUTED: the pretrained-witness claims did not hold (recorded as-is)",
+   "ok": true
+  },
+  {
+   "topic": "scale_axes_demo",
+   "kind": "replayable",
+   "recorded": [
+    "A3-prime resolution (non-degenerate): SUPPORT: the resolution invariance holds at a non-degenerate operating point too"
+   ],
+   "replayed": "[SCALE-AXES offline re-verdict] samples\n  A1-a the reading approaches the truth with more data: R_IB 2.237 (N=40) -> 2.428 (N=300), under-reading 0.922 -> 0.732 -> PASS\n  A1-b not evaluable (a wall was not located at one end)\n  [verdict] MIXED: only one of the two data-sufficiency criteria holds\n[SCALE-AXES offline re-verdict] width\n  W1 (pre-registered) the located wall moves with the student's width: d=64 -> K_wall=2048, d=256 -> K_wall=512 -> PASS\n       retention gap at K=128: d=64 +0.440 vs d=256 +0.470 (difference 0.030)\n       retention gap at K=2048: d=64 +0.051 vs d=256 +0.083 (difference 0.032)\n       retention gap at K=256: d=64 +0.201 vs d=256 +0.169 (difference 0.032)\n       retention gap at K=512: d=64 +0.103 vs d=256 +0.081 (difference 0.022)\n  W2 (added for robustness) the largest retention gain from widening is >= 0.03: +0.032 -> PASS\n  W3 (added) d=128 sits between the two in retention: {'128': 0.435, '2048': 0.036, '256': 0.155, '512': 0.081} -> consistent\n  [verdict] SUPPORT (marginal): a wider student retains the reference at a smaller K, and the largest retention gain clears the added threshold -- but only just (see the numbers above), so the effect is suggestive rather than established\n[SCALE-AXES offline re-verdict] resolution\n  R1 the reading is resolution-invariant: R_IB(8x8)=4.159 vs R_IB(32x32)=4.159, |diff|=0.000 (tol 0.30) -> PASS\n  R2 the wall does not fall as the resolution rises: {8: 128, 16: 128, 32: 128} -> PASS\n  [verdict] SUPPORT: the reading is a property of the task, not of the input resolution",
+   "ok": true
+  },
+  {
+   "topic": "scale_c_clean_demo",
+   "kind": "replayable",
+   "recorded": [
+    "S3 direction (looseness non-increasing in C): Spearman=+0.400 over 4 instances -> FAIL ; asymptote within 0.5 nats -> PASS",
+    "S4 soundness at scale (zero false exclusions at every C): [(8, 0), (27, 0), (64, 0), (216, 0), (1000, 0)] -> PASS",
+    "S5 ceiling effect: excluded levels C=8:1 -> C=1000:1 -> FAIL",
+    "verdict: MIXED/REFUTED: the scale criteria did not hold (recorded as-is)"
+   ],
+   "replayed": "[SCALE-C CLEAN offline re-verdict]  (3 non-scale row(s) skipped: a different row shape)\n  C=    8: eps=0.175 R_IB=1.28 K_min=   4 excl=[2] K_wall=8 looseness=1.63\n  C=   27: eps=0.296 R_IB=1.72 K_min=   6 excl=[2] K_wall=128 looseness=2.82\n  C=   64: eps=0.348 R_IB=2.07 K_min=   8 excl=[2] K_wall=512 looseness=3.01\n  C=  216: eps=0.446 R_IB=2.29 K_min=  10 excl=[2, 8] K_wall=512 looseness=2.72\n  C= 1000: eps=0.613 R_IB=2.01 K_min=   8 excl=[2] K_wall=None looseness=None\n  instances: 5 run, 4 inside the informative error range (S1 gate)\n    C=    8 seed=0 eps=0.175 [gated in] R_IB=1.28 K_min=   4 K_wall=8 looseness=1.63 excl=[2] false=[]\n    C=   27 seed=0 eps=0.296 [gated in] R_IB=1.72 K_min=   6 K_wall=128 looseness=2.82 excl=[2] false=[]\n    C=   64 seed=0 eps=0.348 [gated in] R_IB=2.07 K_min=   8 K_wall=512 looseness=3.01 excl=[2] false=[]\n    C=  216 seed=0 eps=0.446 [gated in] R_IB=2.29 K_min=  10 K_wall=512 looseness=2.72 excl=[2, 8] false=[]\n    C= 1000 seed=0 eps=0.613 [S1 out] R_IB=2.01 K_min=   8 K_wall=None looseness=None excl=[2] false=[]\n  looseness available for 4/4 gated instances (a wall must be located inside the K grid; the rest are 'wall beyond grid')\n  S2 wall scaling: ln K_wall = +1.284*ln C + +0.066  (alpha=1.284, R2=0.830, n=4)\n  S3 asymptote check at C=216: looseness=2.72 vs alpha/(1-eps)=2.32 (|diff|=0.40, tol 0.5)\n  S3 direction (looseness non-increasing in C): Spearman=+0.400 over 4 instances -> FAIL ; asymptote within 0.5 nats -> PASS\n  S4 soundness at scale (zero false exclusions at every C): [(8, 0), (27, 0), (64, 0), (216, 0), (1000, 0)] -> PASS\n  S5 ceiling effect: excluded levels C=8:1 -> C=1000:1 -> FAIL\n  [verdict] MIXED/REFUTED: the scale criteria did not hold (recorded as-is)",
+   "ok": true
+  },
+  {
+   "topic": "scale_c_demo",
+   "kind": "replayable",
+   "recorded": [
+    "S3 direction (looseness non-increasing in C): Spearman=+0.000 over 1 instances -> FAIL ; asymptote within 0.5 nats -> FAIL",
+    "S4 soundness at scale (zero false exclusions at every C): [(8, 0), (64, 0)] -> PASS",
+    "S5 ceiling effect: excluded levels C=8:1 -> C=64:1 -> FAIL",
+    "verdict: MIXED/REFUTED: the scale criteria did not hold (recorded as-is)"
+   ],
+   "replayed": "[SCALE-C offline re-verdict] protocol fingerprint 722a1f7c: 4 instances\n  C=    8 s0: eps=0.262 R_IB=0.99 K_min=   3 excl=[2] K_wall=8 looseness=2.09\n  C=   27 s0: eps=0.348 R_IB=1.52 K_min=   5 excl=[2] K_wall=128 looseness=3.2\n  C=   64 s0: eps=0.404 R_IB=1.81 K_min=   7 excl=[2] K_wall=512 looseness=3.44\n  C=  216 s0: eps=0.437 R_IB=2.34 K_min=  11 excl=[2, 8] K_wall=None looseness=None\n  instances: 4 run, 4 inside the informative error range (S1 gate)\n    C=    8 seed=0 eps=0.262 [gated in] R_IB=0.99 K_min=   3 K_wall=8 looseness=2.09 excl=[2] false=[]\n    C=   27 seed=0 eps=0.348 [gated in] R_IB=1.52 K_min=   5 K_wall=128 looseness=3.2 excl=[2] false=[]\n    C=   64 seed=0 eps=0.404 [gated in] R_IB=1.81 K_min=   7 K_wall=512 looseness=3.44 excl=[2] false=[]\n    C=  216 seed=0 eps=0.437 [gated in] R_IB=2.34 K_min=  11 K_wall=None looseness=None excl=[2, 8] false=[]\n  looseness available for 3/4 gated instances (a wall must be located inside the K grid; the rest are 'wall beyond grid')\n  S2 wall scaling: ln K_wall = +2.018*ln C + -2.024  (alpha=2.018, R2=0.991, n=3)\n  S3 asymptote check at C=64: looseness=3.44 vs alpha/(1-eps)=3.38 (|diff|=0.06, tol 0.5)\n  S3 direction (looseness non-increasing in C): Spearman=+1.000 over 3 instances -> FAIL ; asymptote within 0.5 nats -> PASS\n  S4 soundness at scale (zero false exclusions at every C): [(8, 0), (27, 0), (64, 0), (216, 0)] -> PASS\n  S5 ceiling effect: excluded levels C=8:1 -> C=216:2 -> PASS\n  [verdict] PARTIAL: two of the three scale criteria hold (recorded as-is; see the lines)",
+   "ok": true
+  },
+  {
+   "topic": "tf_exclusion_demo",
+   "kind": "criteria-only",
+   "recorded": null,
+   "criteria": [
+    "tf_verdict"
+   ]
+  },
+  {
+   "topic": "transformer_demo",
+   "kind": "historical",
+   "recorded": null
+  },
+  {
+   "topic": "wall_remeasure_demo",
+   "kind": "replayable",
+   "recorded": [
+    "S1 walls drop or stay: C=8: 32 vs 8, C=27: 128 vs 128, C=64: 512 vs 512, C=216: 512 vs 512 -> FAIL",
+    "S3 zero false exclusions at every C: C=8:0, C=27:0, C=64:0, C=216:0 -> PASS",
+    "verdict: REFUTED: the re-measurement breaks either the drop or the soundness criterion",
+    "CP-H probe (20 epochs, K [64, 128, 192]): MIXED: on real CIFAR-10 at this budget the schedule does move retention, so the synthetic interaction result extends to real data -- with the caveat that this probe is a reduced tier, not the recorded 120-epoch tier",
+    "CP-H tier-matched fixed-LR arm (120 ep): B1 PASS: largest tier-matched |delta| = 0.495 (threshold 0.03) -> the recipe moves retention at the recorded tier too",
+    "saturation probe: MIXED/REFUTED: the crossings are not sharp on the finer ladder, so the located wall (and with it the 'saturation at 512') is partly a threshold artifact of the 10% criterion",
+    "CP-H tier-matched fixed-LR arm (120 ep): B1 PASS: largest tier-matched |delta| = 0.543 (threshold 0.03) -> the recipe moves retention at the recorded tier too",
+    "CP-H tier-matched fixed-LR arm (120 ep): B1 PASS: largest tier-matched |delta| = 0.521 (threshold 0.03) -> the recipe moves retention at the recorded tier too",
+    "saturation probe: REFUTED for the saturation claim: the wall grows as C^0.60 (R²=0.988, n=4) against the certified requirement's C^0.58 -> wall and requirement grow at the same rate, so the earlier 'the wall saturates while the requirement grows' tension was a measurement artifact of the coarse ladder. Every crossing measured so far is sharp",
+    "saturation probe: REFUTED for the saturation claim: the wall grows as C^0.58 (R²=0.966, n=5) against the certified requirement's C^0.58 -> wall and requirement grow at the same rate, so the earlier 'the wall saturates while the requirement grows' tension was a measurement artifact of the coarse ladder. Every crossing measured so far is sharp"
+   ],
+   "replayed": "S1 walls drop or stay: C=8: 32 vs 8, C=27: 128 vs 128, C=64: 512 vs 512, C=216: 512 vs 512 -> FAIL\n  S2 shape under the good recipe: alpha=0.890 (R^2=0.870, n=4), saturating at the top: True, looseness sequence [2.72, 2.82, 3.01, 2.72] non-monotone: True\n       round 3 (fixed LR): alpha=1.284, saturating=True, looseness 1.63/2.82/3.01/2.72 (non-monotone)\n  S3 zero false exclusions at every C: C=8:0, C=27:0, C=64:0, C=216:0 -> PASS\n  [verdict] REFUTED for the expectation, CONFIRMED for the shape: S1 failed (the walls did not drop -- at these short budgets cosine annealing either changes nothing or under-trains), while the shape conclusions (saturation, non-monotone looseness) survive and S3 soundness holds at every C",
+   "ok": true
+  },
+  {
+   "topic": "wall_saturation_demo",
+   "kind": "replayable",
+   "recorded": null,
+   "replayed": "[WALL-SATURATION offline re-verdict] sigma=0.35\n  B1 reference within +0.05 of the Bayes error at every C: C=8: 0.175 vs 0.000, C=27: 0.296 vs 0.000, C=64: 0.348 vs 0.000, C=216: 0.446 vs 0.000, C=1000: 0.613 vs 0.000 -> FAIL\n  B2 Bayes floor and wall both flat over C=[8, 27, 64, 216]: K_min_bayes [8, 27, 64, 216] vs K_wall [8, 128, 512, 512] -> FAIL\n  B3 wall/Bayes-floor ratio not growing: [1.0, 4.7, 8.0, 2.4] -> FAIL\n  [verdict] REFUTED: the task is not the binding constraint -> run the M-REF / M-WIDTH / M-KD arms\n[WALL-SATURATION offline re-verdict] sigma=0.5\n  B1 reference within +0.05 of the Bayes error at every C: C=8: 0.175 vs 0.004, C=27: 0.296 vs 0.005, C=64: 0.348 vs 0.006, C=216: 0.446 vs 0.007, C=1000: 0.613 vs 0.007 -> FAIL\n  B2 Bayes floor and wall both flat over C=[8, 27, 64, 216]: K_min_bayes [8, 26, 61, 200] vs K_wall [8, 128, 512, 512] -> FAIL\n  B3 wall/Bayes-floor ratio not growing: [1.0, 4.9, 8.4, 2.6] -> FAIL\n  [verdict] REFUTED: the task is not the binding constraint -> run the M-REF / M-WIDTH / M-KD arms\n[WALL-SATURATION offline re-verdict] sigma=0.7\n  B1 reference within +0.05 of the Bayes error at every C: C=8: 0.175 vs 0.046, C=27: 0.296 vs 0.062, C=64: 0.348 vs 0.069, C=216: 0.446 vs 0.077, C=1000: 0.613 vs 0.083 -> FAIL\n  B2 Bayes floor and wall both flat over C=[8, 27, 64, 216]: K_min_bayes [7, 18, 38, 109] vs K_wall [8, 128, 512, 512] -> FAIL\n  B3 wall/Bayes-floor ratio not growing: [1.1, 7.1, 13.5, 4.7] -> FAIL\n  [verdict] REFUTED: the task is not the binding constraint -> run the M-REF / M-WIDTH / M-KD arms\n[WALL-SATURATION offline re-verdict] sigma=1.0\n  B1 reference within +0.05 of the Bayes error at every C: C=8: 0.175 vs 0.187, C=27: 0.296 vs 0.245, C=64: 0.348 vs 0.273, C=216: 0.446 vs 0.299, C=1000: 0.613 vs 0.320 -> FAIL\n  B2 Bayes floor and wall both flat over C=[8, 27, 64, 216]: K_min_bayes [4, 7, 12, 24] vs K_wall [8, 128, 512, 512] -> FAIL\n  B3 wall/Bayes-floor ratio not growing: [2.0, 18.3, 42.7, 21.3] -> FAIL\n  [verdict] REFUTED: the task is not the binding constraint -> run the M-REF / M-WIDTH / M-KD arms",
+   "ok": true
+  },
+  {
+   "topic": "witness_demo",
+   "kind": "criteria-only",
+   "recorded": [
+    "task C: T1 monotone R_IB = PASS; T2 soundness (no false exclusion) = PASS; coverage W1=[0.0, 0.0, 0.0] W4=[0.4, 0.3333333333333333, 0.4] -> STEEP",
+    "verdict: SUPPORT: witness strength materially controls exclusion coverage; cheap witnesses stay sound but miss exclusions (the measured cost of skipping the witness)"
+   ],
+   "criteria": [
+    "witness_verdict"
+   ]
+  }
+ ]
+}

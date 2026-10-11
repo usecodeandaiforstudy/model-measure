@@ -1,0 +1,146 @@
+name: tests
+
+# What CI is for in this repository. The project's evidence lives in `experiments/data/*.jsonl` and is replayed
+# offline, so a runner needs no GPU, no datasets and no network -- which means CI can check the three things that
+# actually matter here:
+#   1. the library's invariants and every pre-registered criterion still hold (tests/);
+#   2. every experiment script's own --selftest still passes on fixture data (the criteria live in the scripts);
+#   3. every PUBLISHED VERDICT still rebuilds from the recorded artifacts, and matches the committed snapshot
+#      (tools/reproduce_all.py). A failure here means the prose and the data have drifted apart.
+# No training campaign is run: the expensive campaigns are relay-cached and belong to the machine that ran them.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: tests (python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        # pyproject declares requires-python >= 3.9; 3.11 and 3.13 bracket the versions actually used in practice.
+        python-version: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install torch (CPU build) and the package with its test extra
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install -e ".[test]"
+      - name: Zero-dependency runner (the supported path when pytest is absent)
+        run: python tests/run_all.py
+      - name: pytest (the same cases, collected by pytest)
+        run: python -m pytest tests/ -q
+
+  criteria:
+    name: every script's --selftest
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install torch (CPU build), torchvision and the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install -e ".[dev]"
+      - name: Run --selftest for every script that declares one
+        # The nine earliest scripts predate --selftest (see CONTRIBUTING, "two generations of scripts"), so the
+        # loop runs the flag where it exists instead of assuming every script has it. All failures are reported.
+        run: |
+          fail=0
+          ran=0
+          for f in experiments/*.py; do
+            grep -q -- "--selftest" "$f" || continue
+            ran=$((ran + 1))
+            echo "::group::$f"
+            python "$f" --selftest || fail=1
+            echo "::endgroup::"
+          done
+          echo "scripts with a selftest: $ran"
+          exit $fail
+
+  reproduce:
+    name: replay every published verdict offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install torch (CPU build) and the package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install -e .
+      - name: Rebuild the verdicts and diff against the committed snapshot
+        run: python tools/reproduce_all.py --check
+      - name: Keep the snapshot for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproduce_all_snapshot
+          path: tools/reproduce_all_snapshot.json
+          if-no-files-found: error
+
+  wheel:
+    name: build the wheel and run the public example
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install torch (CPU build)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+      - name: Build the distribution
+        run: python -m pip wheel . --no-deps -w dist/
+      - name: Check that the wheel ships the library and nothing else
+        # The package claims to contain only capacity_lens/ plus the licence: experiments/ is the evidence and
+        # reference/ is the documentation, and neither may leak into a distribution. The check is a script, not
+        # an inline snippet, so it can also be run by hand (`python tools/check_wheel.py`, and `--selftest`
+        # proves the checker itself can say no).
+        run: python tools/check_wheel.py
+      - name: Install the wheel and import it from outside the checkout
+        run: |
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          cd /tmp
+          python -c "import capacity_lens, sys; print('installed at', capacity_lens.__file__); print('version', capacity_lens.__version__)"
+      - name: Run the public example
+        # examples/quickstart.py builds its own task and trains a tiny reference on CPU (about a minute).
+        run: python examples/quickstart.py
+
+  bilingual:
+    name: every document has a matching _cn twin
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Check the twins (no Python packages needed: the checker is stdlib only)
+        # The rule: every document ships in both languages, the Chinese file is the English name plus `_cn`,
+        # and the twin must carry the same headings, the same numbers, the same file references and the same
+        # code. A translation whose numbers drift is worse than no translation.
+        run: python tools/check_bilingual.py

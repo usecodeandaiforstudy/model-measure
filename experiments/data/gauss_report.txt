@@ -1,0 +1,11 @@
+[GAUSS] continuous bottleneck: exclusion transfer + nat-efficiency
+{"seed": 0, "acc_t": 0.9744791666666667, "r_ib": 3.934337405563395, "k_min": 52, "vq_wall": 4.564348191467836, "wall": {"cap": 24.0, "sigma": 0.9461792295344171, "c_nom": 24.000000000000004, "c_ub": 56.24399054292522, "acc": 0.8984375, "ret": 0.9219668626402993, "r_ib_eps": 3.409593326984459, "var_ratio": 4.296013832092285}, "n_below_ub": 0, "ceiling_ret": 1.0, "c0": true, "c1": true, "c2": null, "c3": true, "c4": false, "var_ratio": 7.101365089416504}
+{"seed": 1, "acc_t": 0.9828125, "r_ib": 4.000791354623223, "k_min": 55, "vq_wall": 4.564348191467836, "wall": {"cap": 24.0, "sigma": 0.9461792295344171, "c_nom": 24.000000000000004, "c_ub": 44.04705024138834, "acc": 0.8932291666666666, "ret": 0.9088500264970854, "r_ib_eps": 3.3768068701749163, "var_ratio": 2.6507575511932373}, "n_below_ub": 0, "ceiling_ret": 0.9973502914679385, "c0": true, "c1": true, "c2": null, "c3": true, "c4": false, "var_ratio": 6.7595744132995605}
+{"seed": 2, "acc_t": 0.9864583333333333, "r_ib": 4.031072539992713, "k_min": 57, "vq_wall": 4.564348191467836, "wall": {"cap": 24.0, "sigma": 0.9461792295344171, "c_nom": 24.000000000000004, "c_ub": 53.39444679849808, "acc": 0.9005208333333333, "ret": 0.912882787750792, "r_ib_eps": 3.4227904171724965, "var_ratio": 3.8537251949310303}, "n_below_ub": 0, "ceiling_ret": 0.9920802534318902, "c0": true, "c1": true, "c2": null, "c3": true, "c4": false, "var_ratio": 8.583232879638672}
+  seeds: 3 (a criterion passes at >= 2/3)
+  C0 arm sanity (noiseless ceiling retention >= 0.95): [1.0, 0.997, 0.992] -> PASS
+  C1 upper-bound consistency (R_IB(eps_measured) <= C_ub at every point): ['PASS', 'PASS', 'PASS'] -> PASS
+  C2 certified exclusion transfers (C_ub < R_IB => retention <= 0.75): [(0, 'vacuous'), (0, 'vacuous'), (0, 'vacuous')] -> FAIL
+  C3 wall located + sandwich contains the VQ wall [(C_ub(wall), log K_wall, flag)]: [(56.24, 4.564348191467836, 'PASS'), (44.05, 4.564348191467836, 'PASS'), (53.39, 4.564348191467836, 'PASS')] -> PASS
+  C4 (reported) [C_nom(wall), log K_wall, flag]: [(24.0, 4.564348191467836, 'FAIL'), (24.0, 4.564348191467836, 'FAIL'), (24.0, 4.564348191467836, 'FAIL')]
+verdict: PARTIAL: two of the three continuous-side criteria hold (recorded as-is; see the lines)
