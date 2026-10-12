@@ -139,7 +139,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
-      - name: Check the twins (no Python packages needed: the checker is stdlib only)
+      - name: Check the twins -- no Python packages needed, the checker is stdlib only
         # The rule: every document ships in both languages, the Chinese file is the English name plus `_cn`,
         # and the twin must carry the same headings, the same numbers, the same file references and the same
         # code. A translation whose numbers drift is worse than no translation.
