@@ -41,6 +41,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
           python -m pip install -e ".[test]"
+      - name: Syntax floor (every file must compile on this Python version)
+        # pyproject.toml claims `requires-python >= 3.9`, and this job is the only place that can hold the
+        # repository to it: a construct that parses only on newer Pythons (an f-string expression spanning
+        # lines, or reusing the f-string's own quote inside one) is a SyntaxError here and would otherwise
+        # ship silently. compileall lists every offending file in one run instead of stopping at the first
+        # import error, which is what the test runner does.
+        run: python -m compileall -q capacity_lens experiments tests tools examples
       - name: Zero-dependency runner (the supported path when pytest is absent)
         run: python tests/run_all.py
       - name: pytest (the same cases, collected by pytest)

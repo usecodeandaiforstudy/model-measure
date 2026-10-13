@@ -569,12 +569,13 @@ def saturation_verdict(rows=None, fit_rows=None):
         r["bracketing_drop"] = drop
         if k is not None:
             r["k_wall"] = k
+        boundary = ("sharp boundary" if (drop or 0) >= 0.05
+                    else "SOFT boundary (the located value carries extra ladder uncertainty here)")
         detail.append(f"  A1 C={r['c']}: rel at the wall "
                       f"{None if k is None else round(rel_at(r, k), 3)}, next-smaller {below} at "
                       f"{None if below is None else round(rel_at(r, below), 3)} | A1' drop across the crossing: "
                       f"{None if drop is None else round(drop, 3)}"
-                      f" -> {'sharp boundary' if (drop or 0) >= 0.05 else 'SOFT boundary (the located value '
-                         'carries extra ladder uncertainty here)'}")
+                      f" -> {boundary}")
     walls = {r["c"]: r["k_wall"] for r in rows}
     drops = {r["c"]: r["bracketing_drop"] for r in rows if r.get("bracketing_drop") is not None}
     sharp_instances = [c for c, d in drops.items() if d >= 0.05]
