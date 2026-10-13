@@ -21,7 +21,10 @@ dependencies = ["torch>=2.0"]
 
 [project.optional-dependencies]
 experiments = ["torchvision>=0.15"]
-test = ["pytest>=7"]
+# The test extra carries torchvision because the suite is not only about the library: tests/test_experiment_criteria.py
+# imports the experiment scripts in-process, and five of those import torchvision. Declaring it here keeps
+# `pip install -e ".[test]"` sufficient on a clean machine -- which is exactly what CI relies on.
+test = ["pytest>=7", "torchvision>=0.15"]
 dev = ["torchvision>=0.15", "pytest>=7"]
 
 [tool.setuptools]

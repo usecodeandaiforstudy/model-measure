@@ -34,10 +34,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-      - name: Install torch (CPU build) and the package with its test extra
+      - name: Install torch + torchvision (CPU builds) and the package with its test extra
+        # torchvision comes from the CPU index on purpose: the test extra declares it, and without this line
+        # pip would resolve it from PyPI, which pulls the CUDA build (and a CUDA torch along with it).
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
           python -m pip install -e ".[test]"
       - name: Zero-dependency runner (the supported path when pytest is absent)
         run: python tests/run_all.py
@@ -85,11 +87,13 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-      - name: Install torch (CPU build) and the package
+      - name: Install torch + torchvision (CPU builds) and the package with its test extra
+        # tools/reproduce_all.py imports the experiment modules in-process, so the replay needs what the test
+        # suite needs (torchvision included); the CPU index keeps it off the CUDA build.
         run: |
           python -m pip install --upgrade pip
-          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
-          python -m pip install -e .
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision
+          python -m pip install -e ".[test]"
       - name: Rebuild the verdicts and diff against the committed snapshot
         run: python tools/reproduce_all.py --check
       - name: Keep the snapshot for inspection

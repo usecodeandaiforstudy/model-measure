@@ -65,7 +65,7 @@
 
 ### 3.1 S1 premise: holds (non-saturated regime confirmed)
 
-teacher median **err_1nn = 0.228** (grid64 is 0), **silhouette = 0.187** (≪ 0.6). The CIFAR-10 representation is indeed non-saturated -- **the closure principle is tested outside its original domain of applicability for the first time, and the premise holds**.
+teacher median **err_1nn = 0.228** (grid64 is 0), **silhouette = 0.187** (≪ 0.6). The CIFAR-10 representation is indeed non-saturated -- **the closure principle is tested outside its original domain of applicability and the premise holds**.
 
 ### 3.2 S2/S3 (14 knee-window points: 5 points each for s0/s2 from {2..8} + 4 points for s1 from {64..256})
 
@@ -111,7 +111,7 @@ Cluster decomposition + partial correlation squeeze the gray zone one step furth
 
 | axis | new evidence | status change |
 | --- | --- | --- |
-| 1 capacity | CP-H axis 1: **the exclusion criterion holds on a real task for the first time** (R1a/R1b 3/3, the K_min quantization prediction hits); cliff location remains synthetic-only | strengthened; the applicability statement is refined to "exclusion is general, location needs a hard wall" |
+| 1 capacity | CP-H axis 1: **the exclusion criterion holds on a real task** (R1a/R1b 3/3, the K_min quantization prediction hits); cliff location remains synthetic-only | strengthened; the applicability statement is refined to "exclusion is general, location needs a hard wall" |
 | 2 distinguishability | PA1: the starvation-side "cannot spread out" counterexample disappears (reachability explanation); CP-H axis 2: the non-saturated-side readings carry quality information but are entangled with capacity (gray zone) | the closure principle **survives in weak form**; neither the strong form (pure proxy) nor the strong anti-form (independent axis) is confirmed |
 | 3 difficulty | PA1's K_t=128 "thin margin + high cost" is a textbook case of A-002; CP-H's long KD tail decay is an equal-budget cost | A-002 gains empirical support |
 

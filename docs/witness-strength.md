@@ -98,13 +98,13 @@ Per-task detail:
 ## V. Boundaries
 
 - Three tasks: **A** clean grid64 (3 seeds, a base grid of 11 levels + 3 top-extension levels), **B** merged-class grid64 (2 seeds, 8 + 2 levels), **C** real CIFAR-10 (3 seeds, 13 levels; the reference and the student grid are both read from the CP-H cache, with only one new 8ep cheap CNN witness);
-- The grid fingerprint covers only the **base grid** (project convention, research-summary §10.4): the top extension reused every cached base unit and newly trained only 13 units; task C reused the CP-H's 42 cached units;
+- The grid fingerprint covers only the **base grid** (project convention): the top extension reused every cached base unit and newly trained only 13 units; task C reused the CP-H's 42 cached units;
 - Task B's reference model necessarily FAILs the calibrated G0 acc gate (the task's own ceiling is 0.125); the script has declared that gate inapplicable here (Fano needs only an "achieved error"); task C's reference model (0.768–0.803) is likewise below the default 0.95 gate -- the calibrated gate for CIFAR-10 is the **0.78** recorded by CP-H, and the script handles it as "report only, do not filter";
 - Task C's W3 witness uses a **cheap protocol** (8ep, no cosine), different from the CP-H 120ep cosine budget; this is a constructional difference (already recorded).
 
 ## VI. Corrections and additions accounting (same day)
 
 1. **Verdict aggregation crash**: `is_monotone` was passed a dict → `vals[1:]` KeyError; changed to take values in ladder order, and the self-test fixture was changed to a dict accordingly.
-2. **A cache-hit teacher was not put in `eval()`**: BatchNorm used batch statistics → the KD soft labels differed from the first run, so with mixed cached runs the student results were not reproducible; `m.eval()` was added in `rebuild()`.
-3. **The fingerprint violated the project convention**: originally the whole student grid went into the fingerprint, so adding a level invalidated everything; changed so that only the base grid goes into the fingerprint (the convention is in research-summary §10.4), and `--extend-top` was added for the top extension.
+2. **A cache-hit teacher was not put in `eval()`**: BatchNorm used batch statistics → the KD soft labels differed from the initial run, so with mixed cached runs the student results were not reproducible; `m.eval()` was added in `rebuild()`.
+3. **The fingerprint violated the project convention**: originally the whole student grid went into the fingerprint, so adding a level invalidated everything; changed so that only the base grid goes into the fingerprint, and `--extend-top` was added for the top extension.
 4. **Task C (CIFAR-10) added**: `--task C` / `--task all`; the reference and the measured truth reuse the CP-H cache, and the criterion set is unchanged (recorded in the script docstring (10)).

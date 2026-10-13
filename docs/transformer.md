@@ -2,7 +2,7 @@
 
 > Record date: 2026-09-30　Experiment: `experiments/tf_exclusion_demo.py` (pre-registered criteria in that script's docstring)
 > Purpose: ① run the **complete exclusion pipeline** (reference → `R_IB` → `K_min` → student grid → R1a exclusion → measured wall → looseness)
-> for the first time on a **real Transformer**; ② measure the Transformer-specific **structural boundary** —— does the residual bypass mean that a
+> on a **real Transformer**; ② measure the Transformer-specific **structural boundary** —— does the residual bypass mean that a
 > VQ inside the FFN branch can still count as "supply"? 45 units, 91 minutes, 3 seeds.
 
 ---
@@ -47,7 +47,7 @@ The certified exclusion set `{2, 4}` and the measured failure set `{2, 4}` **agr
 
 ## 4. Three readings
 
-1. **The pipeline holds on a Transformer** (the first end-to-end evidence). The exclusion set, the failure set, the wall and the looseness are all produced on an attention architecture for the first time, and the three seeds are nearly identical rung by rung.
+1. **The pipeline holds on a Transformer** (the first end-to-end evidence). The exclusion set, the failure set, the wall and the looseness are all produced on an attention architecture, and the three seeds are nearly identical rung by rung.
 2. **K=8 is a live demonstration of "necessary≠sufficient"**: `log 8 = 2.079 > R_IB ≈ 1.99`, i.e. **the certified criterion does not exclude it** (the necessary condition holds), yet it retains only 76% of the reference accuracy (relative gap 0.21, falling in the gray zone) —— **it sits exactly on the certification boundary and still misses the bar**. This is not a defect, it is precisely the project's central thesis: the criterion only gives "impossible", not "good enough".
 3. **The Transformer's structural boundary is confirmed, and the consequence is severe**: the residual stream **completely bypasses** the VQ inside the FFN branch, so that layer's `log K` **is not supply at all**. If one applies `min_capacity_serial` literally to a "per-layer bottleneck" reading, one would judge a network that actually works perfectly (K=2, gap 3%) as "necessarily unable to fit" —— a **false kill**. The wiring table's parallel rule (P4 already verified on MLPs) must be enforced on a real Transformer.
 

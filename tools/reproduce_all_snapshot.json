@@ -1,6 +1,6 @@
 {
  "tool": "tools/reproduce_all.py",
- "when": "2026-10-11 16:59:38",
+ "when": "2026-10-13 15:42:28",
  "modules": [
   {
    "topic": "budget_dose_demo",
