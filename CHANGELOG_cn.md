@@ -3,6 +3,23 @@
 `capacity_lens` 包的所有值得一提的变更。版本号只在源码树内递增；**尚未发布到 PyPI**，
 所以请把版本号当作开发里程碑，而不是发行版。
 
+## 0.7.0 — 2026-10-15
+
+### Added
+- `capacity_lens/compress.py`：压缩预算顾问。**可证**一侧：`task_info_floor`（Fano，需传经验 `h_y`，
+  并在"均衡类别默认值不成立"时由 `balance_warning` 报警）、`capacity_floors`（码本 / 容量 / 每维比特下界）、
+  `veto`（**只是必要条件**的 `capacity < R_IB` 否决门）、以及 `tightness_interval` —— 它把真实的任务相关松紧夹在
+  `I_lb / R_IB` 与 `H(y) / R_IB` 之间，**已登记：MNIST ≤1.253×、CIFAR-10 ≤1.917×**，即在匹配单位下证书**可证是紧的**。
+  **实测**一侧（零训练）：`partition_retention`（硬量化在 K=64 时只保留 `I(z;y)` 的 **0.15–0.75**，且始终低于 1）与
+  `partition_ceiling`（**松 2–3×**，只在方向可靠）。
+- `python -m capacity_lens.compress`：把可证报告做成命令行（含 `--selftest`）；实测部分需要训练好的模型，
+  因此留在实验侧驱动脚本里。
+- `docs/compression-advisor.md`（含 `_cn` 孪生）：说明本模块的证据分级 ——
+  **【可证】/【实测】/【归档】/【估计·松】** —— 以及它拒绝掩盖的边界（地板比实用拐点低 10–30×；
+  秩饥饿不可逆、位宽饥饿可被 QAT 找回；只能用验证集上的整网评估来分配；每堵墙都是协议相对的）。
+- `tests/test_compress_advisor.py`：把已登记数值钉住（`R_IB` 1.8367 / 1.2009、两条区间、否决门边界、
+  MNIST 上退化的比特下界），使算术上的变化在 CI 里暴露，而不是在报告里。
+
 ## 0.6.1 — 2026-10-05
 
 ### Added

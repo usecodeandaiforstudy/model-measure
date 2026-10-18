@@ -3,6 +3,27 @@
 All notable changes to the `capacity_lens` package. Versions are bumped in-tree; **nothing has been
 published to PyPI**, so treats version numbers as development milestones rather than releases.
 
+## 0.7.0 — 2026-10-15
+
+### Added
+- `capacity_lens/compress.py`: the compression budget advisor. Certified side: `task_info_floor`
+  (Fano, with the empirical `h_y` and a `balance_warning` when the balanced-class default is invalid),
+  `capacity_floors` (codebook / capacity / per-dimension bit floors), `veto` (the necessary-only
+  `capacity < R_IB` gate) and `tightness_interval`, which brackets the true task-relevant looseness
+  between `I_lb / R_IB` and `H(y) / R_IB` — registered at **≤1.253×** (MNIST) and **≤1.917×**
+  (CIFAR-10), i.e. the certificate is provably tight in matched units. Measured side, zero training:
+  `partition_retention` (hard quantisation keeps **0.15–0.75** of `I(z;y)` at K=64, always below 1) and
+  `partition_ceiling` (**2–3× loose**, sound in direction only).
+- `python -m capacity_lens.compress`: the certified report as a command line (`--selftest` included);
+  the measured sections need a trained model and stay in the campaign driver.
+- `docs/compression-advisor.md` (+ the `_cn` twin): the module's evidence grades — **[CERT] / [MEAS] /
+  [ARCH] / [LOOSE]** — and the boundaries it refuses to hide (the floor sits 10–30× below the practical
+  knee; rank starvation is irreversible, bit starvation is QAT-recoverable; allocate only by
+  whole-network evaluation on a validation split; every wall is protocol-relative).
+- `tests/test_compress_advisor.py`: pins the registered numbers (`R_IB` 1.8367 / 1.2009, the two
+  brackets, the veto boundary, the degenerate bit floor on MNIST) so a change in the arithmetic shows
+  up in CI rather than in a report.
+
 ## 0.6.1 — 2026-10-05
 
 ### Added

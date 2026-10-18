@@ -21,6 +21,11 @@ from .geometry import (silhouette_by_label, separation_ratio,
 from .preflight import (g0_gate, distill_plateau_ok, distill_gap_k_star,
                         excluded_set, coverage, false_exclusions,
                         measured_wall, k_wall_band, looseness, ratio_verdict, preflight_report)
+from .compress import (balance_warning, task_info_floor, capacity_floors, veto, tightness_interval,
+                       eps_for_rib, partition_retention, partition_ceiling, kmeans,
+                       probe_lower_bound, selftest as compress_selftest, BIT_GRID,
+                       quantise_weight, total_bits, average_bits, accuracy_at_bits,
+                       plan_bit_allocation)
 
 __all__ = [
     "VQBottleneck",
@@ -60,6 +65,23 @@ __all__ = [
     "looseness",
     "ratio_verdict",
     "preflight_report",
+    "balance_warning",
+    "task_info_floor",
+    "capacity_floors",
+    "veto",
+    "tightness_interval",
+    "eps_for_rib",
+    "partition_retention",
+    "partition_ceiling",
+    "kmeans",
+    "probe_lower_bound",
+    "compress_selftest",
+    "BIT_GRID",
+    "quantise_weight",
+    "total_bits",
+    "average_bits",
+    "accuracy_at_bits",
+    "plan_bit_allocation",
 ]
 
-__version__ = "0.6.1"
+__version__ = "0.7.0"

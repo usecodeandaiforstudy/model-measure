@@ -250,3 +250,31 @@ _cp3_*.txt
 .pipwheelout/
 .piptmp/
 .pipcache/
+
+# ---------------------------------------------------------------------------------------------------
+# EXTENSION: preliminary work is LOCAL ONLY and must never enter the repository by accident.
+# The published toolkit (capacity_lens, docs/, the campaign experiments under experiments/) is the
+# FOUNDATION; everything below belongs to the extension and lives outside the shipped surface.
+# These rules come last on purpose: lines 233-236 re-include experiments/data/**/*.jsonl,
+# *_report.txt and *_calib.json, so an ignore rule for the extension's evidence has to follow them.
+#
+# Extension notes and scripts: already covered by `reference/` (line 223); listed here for clarity.
+reference/
+
+# Stage 1 / Stage 1b self-distillation experiment: script, evidence rows, report, calibration, checkpoints
+experiments/self_distill_demo.py
+experiments/data/self_distill.jsonl
+experiments/data/self_distill_report.txt
+experiments/data/self_distill_grid64_fast_calib.json
+experiments/data/self_distill.log
+experiments/data/self_distill/
+
+# Scale / real-data robustness check: the script lives in reference/scripts/, its records are local
+experiments/data/scale_robustness.jsonl
+experiments/data/scale_robustness_report.txt
+
+# Any future extension experiment follows the same convention: name the record with one of these prefixes
+# and it stays local automatically.
+experiments/data/ext_*.jsonl
+experiments/data/ext_*_report.txt
+experiments/ext_*.py

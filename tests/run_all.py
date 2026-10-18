@@ -28,6 +28,7 @@ MODULES = [
     "test_quant_distill",
     "test_training",
     "test_geometry",
+    "test_compress_advisor",
     "test_experiment_criteria",
 ]
 
