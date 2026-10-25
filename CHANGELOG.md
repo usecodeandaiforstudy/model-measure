@@ -3,6 +3,19 @@
 All notable changes to the `capacity_lens` package. Versions are bumped in-tree; **nothing has been
 published to PyPI**, so treats version numbers as development milestones rather than releases.
 
+## 0.8.0 — 2026-10-25
+
+### Added
+- `plan_rank_allocation`, `uniform_rank_allocation`, `rank_plan_accuracy`, `rank_parameter_count` and
+  `MIN_RANK`: **zero-training rank allocation**. The search is a coordinate descent on whole-network
+  validation accuracy that uses forward passes only, and the guard never pins a layer below `MIN_RANK`
+  because rank starvation is irreversible (measured: −0.205 retention, 0 of 6 seeds recovered). The
+  water-filling reference spends the budget in full, since a single common rank is dragged down by the
+  smallest cap. Measured locally on the **eligible** instances (reference accuracy >= 0.4): the top-3
+  candidates ranked by this score contained the exhaustive best every time (5.3x fewer fine-tunes,
+  Spearman rho median 0.90). On a 10.4M-parameter instance all 16 candidates were fine-tuned to verify
+  this; with only the top-3 the cost would have been 7.1 minutes instead of 37.6.
+
 ## 0.7.0 — 2026-10-15
 
 ### Added

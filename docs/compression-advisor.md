@@ -53,6 +53,29 @@ strength of the evidence behind it.
    quote a number together with its fingerprint.
 4. **The toolkit's readings support guards and diagnoses; they do not make a model better.**
 
+## Rank allocation (zero training)
+
+`plan_rank_allocation(model, x_val, y_val, budget_params)` searches per-layer ranks on a **validation**
+split using forward passes only, and returns the plan plus the budget-matched uniform reference and both
+measured scores. Helpers: `uniform_rank_allocation` (water-filling into the budget), `rank_plan_accuracy`
+(accuracy at truncated weights; the model is restored afterwards), `rank_parameter_count`, `MIN_RANK`.
+
+- **Never pins a layer below `MIN_RANK`.** Rank starvation is irreversible (measured: −0.205 retention,
+  0 of 6 seeds recovered by fine-tuning), so this guard is hard-coded, not advisory.
+- **The budget counts the Linear layers only**, and the water-filling reference spends it in full — a
+  single common rank is dragged down by the smallest cap and silently under-spends.
+- **Validated locally on the ELIGIBLE instances** (those whose reference accuracy reached 0.4, i.e. the
+  reference actually learned the task): the top-3 candidates ranked by this score contained the
+  exhaustive best every time (gap +0.0000), Spearman rho median 0.90 — i.e. **5.3× fewer fine-tunes
+  (16 → 3)**. On a 10.4M-parameter instance all 16 candidates were fine-tuned to verify this; had only
+  the top-3 been run, the cost **would have been 7.1 minutes instead of 37.6**.
+- **Search on validation data only.** Each candidate costs one SVD per layer plus one forward pass.
+
+```python
+plan = plan_rank_allocation(model, x_val, y_val, budget_params)
+print(plan["ranks"], plan["score"], plan["uniform_score"])
+```
+
 ## CLI
 
 ```bash

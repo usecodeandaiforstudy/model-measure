@@ -25,7 +25,8 @@ from .compress import (balance_warning, task_info_floor, capacity_floors, veto, 
                        eps_for_rib, partition_retention, partition_ceiling, kmeans,
                        probe_lower_bound, selftest as compress_selftest, BIT_GRID,
                        quantise_weight, total_bits, average_bits, accuracy_at_bits,
-                       plan_bit_allocation)
+                       plan_bit_allocation, MIN_RANK, rank_parameter_count,
+                       uniform_rank_allocation, rank_plan_accuracy, plan_rank_allocation)
 
 __all__ = [
     "VQBottleneck",
@@ -82,6 +83,11 @@ __all__ = [
     "average_bits",
     "accuracy_at_bits",
     "plan_bit_allocation",
+    "MIN_RANK",
+    "rank_parameter_count",
+    "uniform_rank_allocation",
+    "rank_plan_accuracy",
+    "plan_rank_allocation",
 ]
 
-__version__ = "0.7.0"
+__version__ = "0.8.0"

@@ -107,6 +107,72 @@ def test_bit_accounting_is_linear_in_widths():
     _approx(average_bits(model, [2, 2]), 2.0, 1e-12)
 
 
+# --- rank allocation (zero training; the guard is that a layer is never pinned below MIN_RANK) -------
+
+def test_rank_parameter_count_matches_the_formula():
+    from capacity_lens import rank_parameter_count
+
+    assert rank_parameter_count([(8, 4), (4, 3)], [2, 2]) == 2 * (8 + 4) + 4 + 2 * (4 + 3) + 3
+
+
+def test_uniform_rank_allocation_fills_the_budget_and_respects_the_floor():
+    from capacity_lens import MIN_RANK, rank_parameter_count, uniform_rank_allocation
+
+    shapes = [(64, 128), (128, 64), (64, 10)]
+    caps = [min(s) for s in shapes]
+    budget = int(rank_parameter_count(shapes, caps) * 0.5)
+    ranks = uniform_rank_allocation(shapes, budget, caps)
+    assert rank_parameter_count(shapes, ranks) <= budget
+    assert min(ranks) >= min(MIN_RANK, min(caps))
+    # an impossible budget degrades to the floor instead of raising or returning zero ranks
+    assert min(uniform_rank_allocation(shapes, 10, caps)) == MIN_RANK
+
+
+def test_rank_plan_accuracy_restores_the_model():
+    import torch
+    from capacity_lens import rank_plan_accuracy
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Linear(16, 16), torch.nn.ReLU(), torch.nn.Linear(16, 4))
+    x, y = torch.randn(64, 16), torch.randint(0, 4, (64,))
+    before = [m.weight.data.clone() for m in model if hasattr(m, "weight")]
+    score = rank_plan_accuracy(model, x, y, [4, 4])
+    after = [m.weight.data for m in model if hasattr(m, "weight")]
+    assert 0.0 <= score <= 1.0
+    assert all(torch.equal(b, c) for b, c in zip(before, after))
+
+
+def test_rank_plan_allocation_stays_in_budget_above_floor_and_never_regresses():
+    import torch
+    from capacity_lens import MIN_RANK, plan_rank_allocation, rank_parameter_count
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Linear(32, 64), torch.nn.ReLU(), torch.nn.Linear(64, 8))
+    x, y = torch.randn(128, 32), torch.randint(0, 8, (128,))
+    shapes = [(m.weight.shape[1], m.weight.shape[0]) for m in model if hasattr(m, "weight")]
+    budget = int(rank_parameter_count(shapes, [32, 32]) * 0.3)
+    plan = plan_rank_allocation(model, x, y, budget)
+    assert plan["params"] <= budget
+    assert min(plan["ranks"]) >= MIN_RANK
+    assert len(plan["ranks"]) == len(plan["shapes"]) == len(plan["caps"])
+    assert plan["score"] >= plan["uniform_score"] - 1e-9    # the search may only improve
+
+
+def test_rank_plan_allocation_is_deterministic():
+    import torch
+    from capacity_lens import plan_rank_allocation, rank_parameter_count
+
+    def run():
+        torch.manual_seed(0)
+        model = torch.nn.Sequential(torch.nn.Linear(32, 64), torch.nn.ReLU(), torch.nn.Linear(64, 8))
+        x, y = torch.randn(128, 32), torch.randint(0, 8, (128,))
+        shapes = [(m.weight.shape[1], m.weight.shape[0]) for m in model if hasattr(m, "weight")]
+        budget = int(rank_parameter_count(shapes, [32, 32]) * 0.3)
+        return plan_rank_allocation(model, x, y, budget)["ranks"]
+
+    assert run() == run()
+
+
 def test_bit_plan_stays_in_budget_and_restores_the_model():
     import torch
     from capacity_lens import BIT_GRID, accuracy_at_bits, plan_bit_allocation
