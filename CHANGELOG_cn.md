@@ -3,6 +3,18 @@
 `capacity_lens` 包的所有值得一提的变更。版本号只在源码树内递增；**尚未发布到 PyPI**，
 所以请把版本号当作开发里程碑，而不是发行版。
 
+## 0.9.0 — 2026-10-30
+
+### Added
+- **策略层（启发式，非严格）**：`retention_curve`（多个 K 的保留率，探针只训一次；与逐 K 测量完全一致，
+  约 **2.2×** 更快）、`shortlist_rank_allocations`（同预算候选各做一次前向打分，返回前 k），以及
+  `budget_ladder` 与 `choose_operating_point`（每档预算下的最优分配、拐点、以及一维成本偏好）。
+  另导出：`STRATEGY_DISCLAIMER`、`FLAT_TOL`、`REF_FLOOR`。**每个策略输出都声明"这不是界"**。
+
+### Fixed
+- 当模型参数预算低于最小分配（例如单个较小的 `nn.Linear`）时，候选生成会**死循环**；现在改为
+  不产生候选并如实返回 `allocation_freedom = False`，不再挂起。
+
 ## 0.8.0 — 2026-10-25
 
 ### Added

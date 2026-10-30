@@ -3,6 +3,21 @@
 All notable changes to the `capacity_lens` package. Versions are bumped in-tree; **nothing has been
 published to PyPI**, so treats version numbers as development milestones rather than releases.
 
+## 0.9.0 — 2026-10-30
+
+### Added
+- **Strategy layer (heuristic, NOT certified)**: `retention_curve` (retention for several K with one probe
+  training; identical to the per-K measurement, about 2.2x faster), `shortlist_rank_allocations` (ranks
+  same-budget allocations with one forward pass each and returns the top k), plus `budget_ladder` and
+  `choose_operating_point` (best allocation per budget level, the knee, and a one-dimensional cost
+  preference). Also exported: `STRATEGY_DISCLAIMER`, `FLAT_TOL`, `REF_FLOOR`. Every strategy output
+  states that it is not a bound.
+
+### Fixed
+- Candidate generation looped forever on a model whose parameter budget is below the minimum allocation
+  (for example a single small `nn.Linear`). It now yields no candidate and reports
+  `allocation_freedom = False` instead of hanging.
+
 ## 0.8.0 — 2026-10-25
 
 ### Added

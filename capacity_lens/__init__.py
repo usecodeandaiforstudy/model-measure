@@ -26,7 +26,9 @@ from .compress import (balance_warning, task_info_floor, capacity_floors, veto, 
                        probe_lower_bound, selftest as compress_selftest, BIT_GRID,
                        quantise_weight, total_bits, average_bits, accuracy_at_bits,
                        plan_bit_allocation, MIN_RANK, rank_parameter_count,
-                       uniform_rank_allocation, rank_plan_accuracy, plan_rank_allocation)
+                       uniform_rank_allocation, rank_plan_accuracy, plan_rank_allocation,
+                       retention_curve, shortlist_rank_allocations, budget_ladder,
+                       choose_operating_point, STRATEGY_DISCLAIMER, FLAT_TOL, REF_FLOOR)
 
 __all__ = [
     "VQBottleneck",
@@ -88,6 +90,13 @@ __all__ = [
     "uniform_rank_allocation",
     "rank_plan_accuracy",
     "plan_rank_allocation",
+    "retention_curve",
+    "shortlist_rank_allocations",
+    "budget_ladder",
+    "choose_operating_point",
+    "STRATEGY_DISCLAIMER",
+    "FLAT_TOL",
+    "REF_FLOOR",
 ]
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"

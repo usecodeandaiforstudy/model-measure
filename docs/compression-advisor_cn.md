@@ -52,6 +52,22 @@ plan = plan_rank_allocation(model, x_val, y_val, budget_params)
 print(plan["ranks"], plan["score"], plan["uniform_score"])
 ```
 
+## 策略层（启发式，**非严格**）
+
+上面的严格函数只能回答"不可能"或"无法判定"。在可证地板与实用拐点之间存在一段很宽的带：配置在信息上
+可行、但在实践上无用，而**任何界都无法判定它**。这一可选层在带内**排序**候选 —— 它复用这些测量、不改动
+其中任何一个，并且**每个输出都带 `STRATEGY_DISCLAIMER`**。
+
+| 函数 | 作用 | 实测证据（小样本、单一任务族） |
+| --- | --- | --- |
+| `retention_curve(z_fit, y_fit, z_eval, y_eval, ks, n_classes)` | 多个 K 的保留率，**探针只训一次** | 与逐 K 测量**完全一致**（最大绝对差 = 0），速度约 **2.2×** |
+| `shortlist_rank_allocations(model, x_val, y_val, budget, k=3)` | 同预算候选各做**一次前向**打分，返回前 k | 在唯一的**非平坦**实例上，top-3 **包含穷举最优**（差距 +0.0000）；平坦实例会如实报告平坦 |
+| `budget_ladder(model, x_val, y_val)` | 每档预算下的最优分配，以及**拐点** | 两个实例的拐点都在全秩参数的 **0.10×** |
+| `choose_operating_point(curve, lam)` | 最大化 `精度 − lam × 参数占比` 的预算档 | λ ∈ [0.05, 0.10] ⇒ 0.10×–0.15×，代价 **0.5–0.75 个点** |
+
+值得看的三个标志：`allocation_freedom`（模型没有可分配对象时为 False）、`flat`（最优与均匀差在 1% 内）、
+`REF_FLOOR`（参照精度低于 0.4 时分数是噪声）。**这些都不是界，也都不允许当作界引用。**
+
 ## 命令行
 
 ```bash

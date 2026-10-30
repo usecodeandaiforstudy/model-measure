@@ -76,6 +76,24 @@ plan = plan_rank_allocation(model, x_val, y_val, budget_params)
 print(plan["ranks"], plan["score"], plan["uniform_score"])
 ```
 
+## Strategy layer (heuristic, NOT certified)
+
+The strict functions above can only answer "impossible" or "undecided". Between the certified floor and
+the practical knee sits a wide band where a configuration is information-feasible yet practically useless,
+and no bound decides it. This optional layer ranks candidates there. It reuses the measurements, changes
+none of them, and every output carries `STRATEGY_DISCLAIMER`.
+
+| Function | What it does | Measured evidence (small samples, one task family) |
+| --- | --- | --- |
+| `retention_curve(z_fit, y_fit, z_eval, y_eval, ks, n_classes)` | retention for several K with ONE probe training | identical to the per-K measurement (max abs delta = 0) at about 2.2x the speed |
+| `shortlist_rank_allocations(model, x_val, y_val, budget, k=3)` | score same-budget allocations with one forward pass each, return the top k | on the one non-flat instance examined the top-3 contained the exhaustive best (gap +0.0000); flat instances are reported as flat |
+| `budget_ladder(model, x_val, y_val)` | best allocation per budget level, plus the knee | knee at 0.10x of full-rank parameters on both instances examined |
+| `choose_operating_point(curve, lam)` | budget level maximising accuracy - lam * parameter share | lam in [0.05, 0.10] buys 0.10x-0.15x for 0.5-0.75 accuracy points |
+
+Flags worth reading: `allocation_freedom` (False when the model has nothing to allocate), `flat` (best
+within 1% of uniform) and `REF_FLOOR` (below 0.4 reference accuracy the score is noise). None of this is a
+bound, and none of it may be quoted as one.
+
 ## CLI
 
 ```bash

@@ -460,6 +460,196 @@ def plan_rank_allocation(model, x, y, budget_params, min_rank=MIN_RANK, max_swee
                 shapes=shapes, caps=caps, min_rank=int(min_rank))
 
 
+# ---------------------------------------------------------------------------
+# STRATEGY LAYER -- heuristic on top of the certified measurements. NOT CERTIFIED.
+#
+#   Everything below reuses the strict primitives above and changes none of them. The strict side can
+#   only say "impossible" or "undecided": in the wide band where a configuration is information-feasible
+#   but practically useless, no bound decides. The honest cheap move there is to RANK candidates and let
+#   the user fine-tune the few at the top.
+#
+#   Evidence (measured locally, small samples, one task family -- never quoted as a bound):
+#     retention_curve   identical to the per-K measurement (max |delta retention| = 0.00000000 on real
+#                       features) at ~2.2x the speed for a multi-K curve
+#     shortlist         the top-3 by the zero-training score contained the exhaustive best on the one
+#                       non-flat instance examined (gap +0.0000); flat instances are reported as flat
+#     budget_ladder     the knee sat at 0.10x of full-rank parameters on both instances examined;
+#                       lambda in [0.05, 0.10] bought 0.10x-0.15x for 0.5-0.75 accuracy points, while 0.05x
+#                       collapsed by ~13 points
+#   None of these numbers is a guarantee, and no output of this section may be called a bound.
+# ---------------------------------------------------------------------------
+STRATEGY_DISCLAIMER = (
+    "STRATEGY / NOT CERTIFIED: this is a heuristic built on the strict measurements. It does not prove "
+    "optimality and must not be quoted as a bound. The strict outputs are unchanged."
+)
+FLAT_TOL = 0.01        # if the best is within this of uniform, the allocation question has no content
+REF_FLOOR = 0.4        # below this reference accuracy the score is noise (same gate as the campaign)
+
+_PROBE_CACHE = {}
+
+
+def _cache_key(*tensors):
+    parts = []
+    for t in tensors:
+        flat = t.reshape(-1)
+        sample = flat[:4].tolist() + flat[-4:].tolist() if flat.numel() >= 8 else flat.tolist()
+        parts.append((tuple(t.shape), str(t.dtype), int(t.numel()),
+                      tuple(round(float(v), 6) for v in sample)))
+    return tuple(parts)
+
+
+def retention_curve(z_fit, y_fit, z_eval, y_eval, ks, n_classes, seed=0):
+    """[MEAS] Retention for several code counts with ONE probe training.
+
+    The probe depends on (z, y) only, never on K, so a curve over several K does not need to retrain it.
+    The numbers equal calling ``partition_retention`` once per K (measured: max |delta| = 0 on real
+    features). Returns ``{K: {...}}`` plus ``"_probe_seconds"``.
+    """
+    if torch is None:
+        raise RuntimeError("retention_curve needs torch")
+    import time                          # local import: the module keeps its top-level imports minimal
+    ks = [int(k) for k in ks]
+    key = (_cache_key(z_fit, y_fit, z_eval, y_eval), int(n_classes), int(seed))
+    t0 = time.time()
+    if key in _PROBE_CACHE:
+        i_rep = _PROBE_CACHE[key]
+    else:
+        i_rep = float(probe_lower_bound(z_fit, y_fit, z_eval, y_eval, n_classes, seed=seed))
+        _PROBE_CACHE[key] = i_rep
+    probe_seconds = time.time() - t0
+    out = {}
+    for k in ks:
+        t1 = time.time()
+        ctr = kmeans(z_fit, k, seed=seed)          # same seed as partition_retention
+        idx_f = torch.cdist(z_fit, ctr).argmin(1)
+        idx_e = torch.cdist(z_eval, ctr).argmin(1)
+        i_code = float(mutual_info_of(idx_e, y_eval, k, n_classes))
+        out[k] = dict(i_code=i_code, i_rep=i_rep,
+                      retention=(i_code / i_rep if i_rep > 0 else float("nan")),
+                      seconds=time.time() - t1)
+    out["_probe_seconds"] = probe_seconds
+    return out
+
+
+def _same_budget_candidates(shapes, budget, n_random=14, seed=0):
+    """Information-free candidate generator at a fixed budget: uniform, greedy proxy, seeded randoms."""
+    import random                       # local import: this module keeps its top-level imports minimal
+    caps = [min(s) for s in shapes]
+    rng = random.Random(seed)
+    out = {"uniform": uniform_rank_allocation(shapes, budget, caps, MIN_RANK)}
+    proxy = [min(MIN_RANK, c) for c in caps]
+    order = sorted(range(len(caps)), key=lambda i: -caps[i])
+    while True:
+        placed = False
+        for i in order:
+            if proxy[i] >= caps[i]:
+                continue
+            trial = list(proxy)
+            trial[i] += 1
+            if rank_parameter_count(shapes, trial) <= budget:
+                proxy[i] += 1
+                placed = True
+        if not placed:
+            break
+    out["proxy"] = proxy
+    for j in range(n_random):
+        trial = [rng.randint(MIN_RANK, max(MIN_RANK, c)) for c in caps]
+        while rank_parameter_count(shapes, trial) > budget:
+            # Stop when nothing can be shrunk: a budget below the minimum allocation (for example a
+            # model with one small Linear layer) used to loop forever here instead of yielding no
+            # candidate at all. The caller then reports allocation_freedom = False.
+            if all(t <= MIN_RANK for t in trial):
+                break
+            i = rng.randrange(len(caps))
+            if trial[i] > MIN_RANK:
+                trial[i] -= 1
+        if rank_parameter_count(shapes, trial) <= budget:
+            out["rand%d" % j] = trial
+    return out
+
+
+def shortlist_rank_allocations(model, x, y, budget_params, k=3, n_random=14, seed=0,
+                               include_descent=True):
+    """[STRATEGY] Rank same-budget allocations and return the top ``k``. Zero training, not a bound.
+
+    Score = ``rank_plan_accuracy`` at the truncated weights (one forward pass per candidate); the caller
+    fine-tunes only the shortlist, which is where the saving comes from. Flags: ``allocation_freedom``
+    (False when every candidate collapses to the same ranks, so the question is empty), ``flat`` (best
+    within ``FLAT_TOL`` of uniform) and ``unreliable_note`` (the reference-accuracy gate).
+    """
+    layers = _linear_layers(model)
+    if not layers:
+        raise ValueError("shortlist_rank_allocations needs at least one nn.Linear layer")
+    shapes = [(l.weight.shape[1], l.weight.shape[0]) for l in layers]
+    cands = _same_budget_candidates(shapes, budget_params, n_random=n_random, seed=seed)
+    if include_descent:
+        try:
+            cands["descent"] = plan_rank_allocation(model, x, y, budget_params, min_rank=MIN_RANK)["ranks"]
+        except Exception:                                  # noqa: BLE001
+            pass
+    scored = []
+    for name, ranks in cands.items():
+        if min(ranks) < MIN_RANK or rank_parameter_count(shapes, ranks) > budget_params:
+            continue
+        scored.append(dict(name=name, ranks=list(ranks),
+                           score=float(rank_plan_accuracy(model, x, y, ranks)),
+                           params=int(rank_parameter_count(shapes, ranks))))
+    scored.sort(key=lambda r: -r["score"])
+    uniform = next((r for r in scored if r["name"] == "uniform"), None)
+    best = scored[0] if scored else None
+    distinct = len({tuple(r["ranks"]) for r in scored})
+    return dict(disclaimer=STRATEGY_DISCLAIMER, shortlist=scored[:k], best=best, uniform=uniform,
+                n_candidates=len(scored), n_distinct=distinct,
+                allocation_freedom=bool(distinct > 1),
+                flat=bool(uniform and best and (best["score"] - uniform["score"]) < FLAT_TOL),
+                unreliable_note=("reference accuracy below %.1f makes this score noise" % REF_FLOOR),
+                budget_params=int(budget_params), min_rank=int(MIN_RANK))
+
+
+def budget_ladder(model, x, y, ladder=(0.05, 0.10, 0.15, 0.25, 0.40, 0.60), n_random=10, seed=0):
+    """[STRATEGY] Best allocation at each budget level, plus the knee. Zero training, not a bound.
+
+    Inside one budget every candidate spends the same parameters; across budgets the curve has a slope,
+    which is where cost and accuracy actually trade. ``knee_frac`` is the smallest budget whose score is
+    within ``FLAT_TOL`` of the best score anywhere on the ladder.
+    """
+    layers = _linear_layers(model)
+    if not layers:
+        raise ValueError("budget_ladder needs at least one nn.Linear layer")
+    shapes = [(l.weight.shape[1], l.weight.shape[0]) for l in layers]
+    full = rank_parameter_count(shapes, [min(s) for s in shapes])
+    curve = []
+    for frac in ladder:
+        budget = max(2 * MIN_RANK * len(shapes), int(full * float(frac)))
+        best = None
+        for name, ranks in _same_budget_candidates(shapes, budget, n_random=n_random, seed=seed).items():
+            if min(ranks) < MIN_RANK or rank_parameter_count(shapes, ranks) > budget:
+                continue
+            s = rank_plan_accuracy(model, x, y, ranks)
+            if best is None or s > best["score"]:
+                best = dict(name=name, ranks=list(ranks), score=float(s),
+                            params=int(rank_parameter_count(shapes, ranks)))
+        if best is not None:
+            curve.append(dict(frac=float(frac), **best))
+    best_score = max((c["score"] for c in curve), default=float("nan"))
+    knee = next((c for c in curve if c["score"] >= best_score - FLAT_TOL), None)
+    return dict(disclaimer=STRATEGY_DISCLAIMER, curve=curve, full_params=int(full),
+                best_score=best_score, knee_frac=(knee["frac"] if knee else None),
+                knee_params=(knee["params"] if knee else None))
+
+
+def choose_operating_point(curve, lam):
+    """[STRATEGY] Budget level maximising ``accuracy - lam * (params / full_params)``.
+
+    ``curve`` is ``budget_ladder(...)["curve"]``. ``lam = 0`` keeps the most accurate level, larger values
+    prefer cheaper levels. It is a one-dimensional preference knob, not a decision the library can make.
+    """
+    if not curve:
+        return None
+    full = max(c["params"] for c in curve) or 1
+    return max(curve, key=lambda c: c["score"] - float(lam) * (c["params"] / full))
+
+
 def main(argv=None):
     """CLI: the certified part of the advisor report. ``python -m capacity_lens.compress --acc 0.918``.
 

@@ -193,3 +193,78 @@ def test_bit_plan_stays_in_budget_and_restores_the_model():
     with torch.no_grad():
         after = [m.weight.data for m in model.modules() if hasattr(m, "weight")]
     assert all(torch.equal(b, a) for b, a in zip(before, after))   # the model is restored
+
+
+# --- strategy layer (heuristic, NOT certified: it must never be described as a bound) ----------------
+
+def test_retention_curve_matches_the_per_k_measurement():
+    import torch
+    from capacity_lens import partition_retention, retention_curve
+
+    torch.manual_seed(0)
+    z = torch.randn(200, 6)
+    y = (z[:, 0] > 0).long()      # structured labels: on pure noise the probe bound is <= 0 and the
+                                  # ratio is NaN, which would test nothing
+    # 4*K*C = 16 for K=2, C=2, so the shipped guard is satisfied on a 200-sample split
+    shipped = partition_retention(z[:100], y[:100], z[100:], y[100:], 2, 2, seed=0)
+    curve = retention_curve(z[:100], y[:100], z[100:], y[100:], [2], 2, seed=0)
+    _approx(curve[2]["retention"], shipped[0], 1e-9)
+    assert "_probe_seconds" in curve
+
+
+def test_shortlist_reports_no_allocation_freedom_on_a_single_linear_model():
+    import torch
+    from capacity_lens import rank_parameter_count, shortlist_rank_allocations
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Flatten(), torch.nn.Linear(16, 4))
+    x, y = torch.randn(64, 16), torch.randint(0, 4, (64,))
+    budget = int(rank_parameter_count([(16, 4)], [4]) * 0.25)
+    out = shortlist_rank_allocations(model, x, y, budget, k=3, n_random=4, seed=0)
+    assert out["allocation_freedom"] is False
+    assert out["n_distinct"] <= 1
+
+
+def test_shortlist_carries_the_disclaimer_and_stays_in_budget():
+    import torch
+    from capacity_lens import (STRATEGY_DISCLAIMER, rank_parameter_count,
+                               shortlist_rank_allocations)
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Linear(32, 64), torch.nn.ReLU(), torch.nn.Linear(64, 8))
+    x, y = torch.randn(128, 32), torch.randint(0, 8, (128,))
+    shapes = [(m.weight.shape[1], m.weight.shape[0]) for m in model if hasattr(m, "weight")]
+    budget = int(rank_parameter_count(shapes, [32, 32]) * 0.3)
+    out = shortlist_rank_allocations(model, x, y, budget, k=2, n_random=3, seed=0)
+    assert out["disclaimer"] is STRATEGY_DISCLAIMER
+    assert "NOT CERTIFIED" in out["disclaimer"]
+    assert "flat" in out and "allocation_freedom" in out
+    for c in out["shortlist"]:
+        assert c["params"] <= budget
+
+
+def test_budget_ladder_and_operating_point_are_consistent():
+    import torch
+    from capacity_lens import budget_ladder, choose_operating_point
+
+    torch.manual_seed(0)
+    model = torch.nn.Sequential(torch.nn.Linear(32, 64), torch.nn.ReLU(), torch.nn.Linear(64, 8))
+    x, y = torch.randn(128, 32), torch.randint(0, 8, (128,))
+    lad = budget_ladder(model, x, y, ladder=(0.15, 0.30), n_random=2, seed=0)
+    assert len(lad["curve"]) == 2
+    for c in lad["curve"]:
+        assert 0.0 <= c["score"] <= 1.0
+    assert lad["knee_frac"] is not None
+    # a larger lambda can only pick a level that is no more expensive than what lambda=0 picks
+    free = choose_operating_point(lad["curve"], 0.0)
+    stingy = choose_operating_point(lad["curve"], 1.0)
+    assert stingy["params"] <= free["params"]
+    assert choose_operating_point([], 0.5) is None
+
+
+def test_strategy_constants_are_sane():
+    from capacity_lens import FLAT_TOL, MIN_RANK, REF_FLOOR
+
+    assert 0.0 < FLAT_TOL <= 0.05
+    assert 0.0 < REF_FLOOR < 1.0
+    assert MIN_RANK >= 2          # the starvation guard must never be advisory
