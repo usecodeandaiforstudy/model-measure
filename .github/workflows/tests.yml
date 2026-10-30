@@ -21,7 +21,10 @@ concurrency:
 jobs:
   tests:
     name: tests (python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest now resolves to 26.04, where actions/setup-python cannot provide 3.9
+    # ("The version '3.9' with architecture 'x64' was not found for Ubuntu 26.04"). 22.04 still ships it,
+    # so the 3.9 floor keeps being tested instead of silently disappearing from the matrix.
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     strategy:
       fail-fast: false
