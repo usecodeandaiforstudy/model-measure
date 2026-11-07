@@ -1,6 +1,7 @@
 """Check that the built wheel ships the library and nothing else.
 
-The package claims (`pyproject.toml`) that a distribution contains only `capacity_lens/` plus the licence:
+The package claims (`pyproject.toml`) that a distribution ships `capacity_lens/` plus `capacity_dataset/`
+and the licence:
 `experiments/` is the evidence and `reference/` is the documentation, and neither belongs in something a user
 installs. That claim is checkable, so it is checked -- here and in CI -- rather than trusted.
 
@@ -18,7 +19,7 @@ import sys
 import zipfile
 
 FORBIDDEN_PREFIXES = ("experiments/", "reference/", "tests/", "tools/", "examples/", ".github/")
-REQUIRED_SUFFIX = "capacity_lens/__init__.py"
+REQUIRED_SUFFIXES = ("capacity_lens/__init__.py", "capacity_dataset/__init__.py")
 
 
 def check(wheel):
@@ -28,8 +29,9 @@ def check(wheel):
     leaked = [n for n in names if n.startswith(FORBIDDEN_PREFIXES)]
     if leaked:
         return False, f"{label}: ships {len(leaked)} non-library entries, e.g. {leaked[:3]}"
-    if not any(n.endswith(REQUIRED_SUFFIX) for n in names):
-        return False, f"{label}: does not contain {REQUIRED_SUFFIX} (not a capacity-lens wheel?)"
+    missing = [s for s in REQUIRED_SUFFIXES if not any(n.endswith(s) for n in names)]
+    if missing:
+        return False, f"{label}: missing required module(s) {missing} (not a capacity-lens wheel?)"
     licence = [n for n in names if os.path.basename(n).startswith(("LICENSE", "COPYING"))]
     return True, (f"{label}: {len(names)} entries, library only "
                   f"(licence present: {bool(licence)})")
@@ -49,6 +51,7 @@ def run_selftest():
     """The checker must be able to say no: three synthetic archives, two of which must be rejected."""
     ok = []
     good = _archive(["capacity_lens/__init__.py", "capacity_lens/preflight.py",
+                     "capacity_dataset/__init__.py", "capacity_dataset/report.py",
                      "capacity_lens-0.6.1.dist-info/METADATA",
                      "capacity_lens-0.6.1.dist-info/licenses/LICENSE"])
     passed, _ = check(good)
@@ -59,6 +62,9 @@ def run_selftest():
     empty = _archive(["something_else/__init__.py"])
     passed, _ = check(empty)
     ok.append(("an unrelated wheel is rejected", not passed))
+    half = _archive(["capacity_lens/__init__.py"])          # missing capacity_dataset on purpose
+    passed, _ = check(half)
+    ok.append(("a wheel missing capacity_dataset is rejected", not passed))
     print("[check_wheel selftest]")
     all_ok = True
     for name, passed in ok:

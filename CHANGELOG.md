@@ -3,6 +3,13 @@
 All notable changes to the `capacity_lens` package. Versions are bumped in-tree; **nothing has been
 published to PyPI**, so treats version numbers as development milestones rather than releases.
 
+## 1.0.0 — 2026-11-07
+
+### Added
+- `capacity_dataset`: dataset reports (duplicates, saturation, review price), codec
+  attribution (`codec_report`, `latent_report`) and a one-command demo. Runtime dependencies
+  are unchanged (torch only).
+
 ## 0.9.0 — 2026-10-30
 
 ### Added

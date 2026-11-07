@@ -571,3 +571,17 @@ Then, per topic:
 - **Citation**: `CITATION.cff` carries the metadata; the repository URL is intentionally empty until a
   repository exists, because inventing one would be the kind of fabricated detail this project refuses.
 - **Licence**: MIT.
+
+## What this project measures
+
+We measure a neural system as three parts: **structure and substrate**, **encoder/decoder**, and **data**.
+This project is an information-theoretic measurement tool for those three:
+
+| part | what we measure | where |
+| --- | --- | --- |
+| structure and substrate | capacity accounting, certified veto, tightness bracket, rank/bit budgets | `capacity_lens` |
+| encoder/decoder | latent capacity, information efficiency, loss attribution (encoder / decoder / neither) | `capacity_dataset` |
+| data | duplicates and collisions, saturation on parameter and sample axes, review price, provable edit effects | `capacity_dataset` |
+
+It answers "is it enough, where is it lost, is it worth it". It does not design architectures and does not
+clean data automatically.

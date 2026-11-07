@@ -29,7 +29,7 @@ dev = ["torchvision>=0.15", "pytest>=7"]
 
 [tool.setuptools]
 # ship ONLY the library: experiments/ and reference/ stay in the repository (they are the evidence, not the API)
-packages = ["capacity_lens"]
+packages = ["capacity_lens", "capacity_dataset"]
 
 [tool.setuptools.dynamic]
 version = { attr = "capacity_lens.__version__" }
