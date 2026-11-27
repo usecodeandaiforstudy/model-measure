@@ -1,4 +1,28 @@
 # 更新日志（CHANGELOG）
+## 未发布（1.1.0）—— 损失单位的扩展
+
+### 新增
+- `capacity_lens.cost`：**损失单位**的约束代价（`constraint_cost`，30 次 CG Hessian-向量积）、
+  **可证下界**（`certify_lower`）、受约束局部最优检验（`is_constrained_local_min`）、
+  仅用于排序的对齐先验（`alignment_prior`）。**不声明上界**：真实路径上 Hessian 最小特征值为负（4/4 格），
+  强凸不成立。
+- `capacity_lens.capacity_probe`：记忆容量，**四条可复现规则写进返回值**（预算、饱和验证、抽样≥5、架构回显）。
+  未饱和时返回**下界 + 告警**，而不是容量。
+- `capacity_lens.represent`：子集代表度 `rho'`、阈值标定 `tau = max(1.5*q95(baseline), 2.0)`、
+  报告**必带 `validity.window_steps`**（该信号与重训后损失的秩相关在 ~100 步内为 0.900，到 1000 步降为 0.600）。
+- `capacity_lens.bit_curves`：激活比特与剪枝曲线（饱和宽度、断崖与安全数量）。
+- `capacity_lens.tradeoff`：由两条率–失真曲线做编码器选型（交叉点与自编码器地板）。
+- 文档：`docs/cost`、`docs/capacity_probe`、`docs/represent`、`docs/bit_curves`、`docs/tradeoff`（含 `_cn`），
+  每篇都带「能声明 / 不能声明」两张表。
+
+### 变更
+- `__version__` 现为 `1.1.0`。**未修改任何现有实现**：扩展只追加导出。
+- `tests/run_all.py` 注册了六个新测试模块。
+
+### 说明
+- `python tests/run_all.py` 报告 **200 passed**（原有 128 + 新增 72）。新测试可被 pytest 收集
+  （在不装 pytest 的情况下用替代收集器验证过），同时也走零依赖路径。
+
 
 `capacity_lens` 包的所有值得一提的变更。版本号只在源码树内递增；**尚未发布到 PyPI**，
 所以请把版本号当作开发里程碑，而不是发行版。

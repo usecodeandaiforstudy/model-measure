@@ -1,4 +1,30 @@
 # Changelog
+## Unreleased (1.1.0) -- loss-denominated extension
+
+### Added
+- `capacity_lens.cost`: constraint cost in **loss** units (`constraint_cost` via 30 CG Hessian-vector products),
+  a certified **lower** bound (`certify_lower`), the constrained-local-minimum check (`is_constrained_local_min`)
+  and an alignment prior for ranking only (`alignment_prior`). No upper bound is claimed: along real paths the
+  minimum Hessian eigenvalue is negative (4/4 cells), so convexity fails.
+- `capacity_lens.capacity_probe`: memorisation capacity with the four reproducibility rules built into the
+  return value (budget, saturation verification, >=5 draws, architecture echo). Unsaturated runs return a
+  lower bound plus a warning instead of a capacity.
+- `capacity_lens.represent`: subset representativeness `rho'`, threshold calibration
+  `tau = max(1.5*q95(baseline), 2.0)`, and a report that always carries `validity.window_steps`
+  (the signal's rank correlation with post-retraining loss is 0.900 to ~100 steps, 0.600 by 1000).
+- `capacity_lens.bit_curves`: activation-bit and pruning curves (saturation width, cliff and safe count).
+- `capacity_lens.tradeoff`: encoder choice from two rate-distortion curves (crossover and autoencoder floor).
+- Docs: `docs/cost`, `docs/capacity_probe`, `docs/represent`, `docs/bit_curves`, `docs/tradeoff` (+ `_cn`),
+  each with a "can claim / cannot claim" pair of tables.
+
+### Changed
+- `__version__` is now `1.1.0`. Nothing existing was modified: the extension only appends exports.
+- `tests/run_all.py` registers six new test modules.
+
+### Notes
+- `python tests/run_all.py` reports **200 passed** (128 existing + 72 new). The new suite is pytest-collectible
+  (verified without pytest via a shim) but the tests were written to run under the zero-dependency path too.
+
 
 All notable changes to the `capacity_lens` package. Versions are bumped in-tree; **nothing has been
 published to PyPI**, so treats version numbers as development milestones rather than releases.

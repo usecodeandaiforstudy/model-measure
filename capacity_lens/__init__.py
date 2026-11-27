@@ -99,4 +99,23 @@ __all__ = [
     "REF_FLOOR",
 ]
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
+
+
+# --- extension (1.1.0): loss-denominated constraint cost, memorisation capacity, subset representativeness,
+# --- bit-side curves and encoder trade-offs. Separate modules; nothing above is modified.
+from . import bit_curves, capacity_probe, cost, represent, tradeoff  # noqa: E402
+from .cost import (alignment_prior, certify_lower, cg_solve_hinv_g, constraint_cost,  # noqa: E402
+                   is_constrained_local_min)
+from .capacity_probe import bisect_threshold, measure_capacity, p_fit  # noqa: E402
+from .represent import align_report, calibrate_threshold, subset_rho_prime  # noqa: E402
+from .bit_curves import activation_curve, pruning_curve  # noqa: E402
+from .tradeoff import codec_tradeoff  # noqa: E402
+
+__all__ = list(__all__) + [
+    "bit_curves", "capacity_probe", "cost", "represent", "tradeoff",
+    "cg_solve_hinv_g", "constraint_cost", "certify_lower", "is_constrained_local_min", "alignment_prior",
+    "p_fit", "bisect_threshold", "measure_capacity",
+    "calibrate_threshold", "subset_rho_prime", "align_report",
+    "activation_curve", "pruning_curve", "codec_tradeoff",
+]

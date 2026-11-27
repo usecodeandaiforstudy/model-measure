@@ -30,6 +30,12 @@ MODULES = [
     "test_geometry",
     "test_compress_advisor", "test_capacity_dataset",
     "test_experiment_criteria",
+    "test_cost",
+    "test_capacity_probe",
+    "test_represent",
+    "test_bit_curves",
+    "test_tradeoff",
+    "test_integration",
 ]
 
 
