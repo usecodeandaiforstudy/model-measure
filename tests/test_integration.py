@@ -23,6 +23,8 @@ from capacity_lens.cost import certify_lower, constraint_cost, is_constrained_lo
 from capacity_lens.capacity_probe import measure_capacity
 from capacity_lens.represent import align_report
 from capacity_lens.tradeoff import codec_tradeoff
+from capacity_lens.batch_delta import (delta_summary, online_step_delta, per_batch_delta,
+                                       select_batches, track_probe)
 
 D_IN, H, C, N = 8, 6, 4, 200
 
@@ -191,6 +193,31 @@ def test_tradeoff_with_real_pca():
         ae_curve[k] = pca_curve[k] * 1.1          # a deliberately worse synthetic 'autoencoder'
     r = codec_tradeoff(pca_curve, ae_curve)
     assert r["winner_at"][2] == "pca" and r["crossover_k"] == 2
+
+
+def test_batch_delta_on_a_real_model():
+    x, y = _make(N, 8)
+    m = _train(_model(), x, y)
+    ps = [p for p in m.parameters()]
+    g_p = torch.cat([t.reshape(-1) for t in torch.autograd.grad(_loss(m, x, y), ps)])
+    full = float(_loss(m, x, y).detach())
+    per_batch = {}
+    for b in range(4):
+        xb, yb = x[b * 25:(b + 1) * 25], y[b * 25:(b + 1) * 25]
+        g_b = torch.cat([t.reshape(-1) for t in torch.autograd.grad(_loss(m, xb, yb), ps)])
+        per_batch[b] = online_step_delta(float((g_p * g_b).sum()), lr=1e-3)["delta_step"] + full
+    d = per_batch_delta(per_batch, full)
+    s = delta_summary(d)
+    assert s["n"] == 4 and isinstance(s["cv"], float)
+    picked = select_batches(d, frac=0.5, mode="high")
+    assert len(picked) == 2 and picked == select_batches(d, frac=0.5, mode="high")
+
+
+def test_track_probe_needs_only_numbers():
+    # track_probe needs at least three epochs to report a correlation, so give it three
+    r = track_probe([-5e-3, -5e-3, -3e-3, -3e-3, -1e-3, -1e-3], [1.0, 0.9, 0.8])
+    assert r["epoch_tracking_spearman"] is not None and r["epoch_tracking_spearman"] < -0.9
+    assert r["spread_ratio"] > 0
 
 
 if __name__ == "__main__":

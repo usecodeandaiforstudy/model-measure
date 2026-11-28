@@ -36,6 +36,7 @@ MODULES = [
     "test_bit_curves",
     "test_tradeoff",
     "test_integration",
+    "test_batch_delta",
 ]
 
 

@@ -99,12 +99,14 @@ __all__ = [
     "REF_FLOOR",
 ]
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 # --- extension (1.1.0): loss-denominated constraint cost, memorisation capacity, subset representativeness,
 # --- bit-side curves and encoder trade-offs. Separate modules; nothing above is modified.
-from . import bit_curves, capacity_probe, cost, represent, tradeoff  # noqa: E402
+from . import batch_delta, bit_curves, capacity_probe, cost, represent, tradeoff  # noqa: E402
+from .batch_delta import (delta_summary, online_step_delta, per_batch_delta,  # noqa: E402
+                          probe_signal, rank_batches, select_batches, track_probe)
 from .cost import (alignment_prior, certify_lower, cg_solve_hinv_g, constraint_cost,  # noqa: E402
                    is_constrained_local_min)
 from .capacity_probe import bisect_threshold, measure_capacity, p_fit  # noqa: E402
@@ -113,6 +115,8 @@ from .bit_curves import activation_curve, pruning_curve  # noqa: E402
 from .tradeoff import codec_tradeoff  # noqa: E402
 
 __all__ = list(__all__) + [
+    "batch_delta", "per_batch_delta", "delta_summary", "rank_batches",
+    "select_batches", "online_step_delta", "track_probe",
     "bit_curves", "capacity_probe", "cost", "represent", "tradeoff",
     "cg_solve_hinv_g", "constraint_cost", "certify_lower", "is_constrained_local_min", "alignment_prior",
     "p_fit", "bisect_threshold", "measure_capacity",
